@@ -1,0 +1,226 @@
+<!DOCTYPE html><html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Tablica Informacji Podróżnych</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #006400;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: yellow;
+    }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .clock-calendar {
+      width: 300px;
+      text-align: center;
+      background: #111;
+      padding: 10px;
+      border: 2px solid #555;
+    }
+    .pragotron-display {
+      flex-grow: 1;
+      margin-left: 20px;
+      background: #000;
+      padding: 10px;
+      border: 2px solid #555;
+    }
+    .table-row {
+      display: flex;
+      border-bottom: 1px solid #555;
+      padding: 5px;
+    }
+    .table-cell {
+      flex: 1;
+      padding: 0 5px;
+    }
+    .editor {
+      background: #111;
+      padding: 10px;
+      margin-top: 10px;
+      border: 2px solid #555;
+    }
+    .editor input {
+      width: 100px;
+      margin: 3px;
+    }
+    .yellow {
+      background: yellow;
+      color: black;
+    }
+    button {
+      padding: 5px 10px;
+      margin: 3px;
+    }
+    .auto-edit {
+      background: #333;
+      color: #0f0;
+      font-weight: bold;
+      border: none;
+      padding: 3px 5px;
+    }
+    .transmit-btn {
+      background: #0f0;
+      border: none;
+      font-weight: bold;
+    }
+    .clear-btn {
+      background: red;
+      border: none;
+      font-weight: bold;
+      color: white;
+    }
+    .red-text {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <div class="clock-calendar">
+      <h1 id="clock">--:--:--</h1>
+      <div id="calendar"></div>
+    </div>
+    <div class="pragotron-display" id="display">
+      <div class="table-row"><b class="table-cell">DO STACJI</b><b class="table-cell">PRZEZ</b><b class="table-cell">POC</b><b class="table-cell">GODZINA</b><b class="table-cell">OPÓŹN</b><b class="table-cell">PERON</b></div>
+      <div id="rows"></div>
+    </div>
+  </div>  <div id="editors"></div>  <script>
+    const TOR_MAP = [5, 1, 2, 4, 8];
+    const PERON_MAP = [1, 2, 2, 3, 3];
+    const rowsContainer = document.getElementById("rows");
+    const editorsContainer = document.getElementById("editors");
+
+    let data = Array(5).fill().map(() => ({
+      dest: "",
+      przez: "",
+      poc: "",
+      godzina: "",
+      opoznienie: "",
+      peron: "",
+      kasowanie: ""
+    }));
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById("clock").textContent = now.toLocaleTimeString();
+
+      let cal = `<b>${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()}</b><br><table style='width:100%; color:white;'>`;
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      cal += "<tr><th>N</th><th>Pn</th><th>Wt</th><th>Śr</th><th>Cz</th><th>Pt</th><th>So</th></tr><tr>";
+
+      for (let i = 0; i < firstDay; i++) cal += "<td></td>";
+      for (let d = 1; d <= daysInMonth; d++) {
+        const day = new Date(now.getFullYear(), now.getMonth(), d);
+        if ((day.getDay() === 0) && d !== 1) cal += "</tr><tr>";
+        cal += `<td${d === now.getDate() ? " style='background:yellow;color:black;'" : ""}>${d}</td>`;
+      }
+      cal += "</tr></table>";
+      document.getElementById("calendar").innerHTML = cal;
+
+      checkAutoClear(now);
+    }
+
+    function checkAutoClear(now) {
+      data.forEach((d, i) => {
+        if (d.kasowanie) {
+          const clearTime = new Date("1970-01-01T" + d.kasowanie);
+          const current = new Date("1970-01-01T" + now.toTimeString().substring(0,8));
+          if (current >= clearTime) clearData(i);
+        }
+      });
+    }
+
+    function renderDisplay() {
+      rowsContainer.innerHTML = "";
+      data.forEach(d => {
+        const row = document.createElement("div");
+        row.className = "table-row";
+        row.innerHTML = `
+          <div class="table-cell">${d.dest}</div>
+          <div class="table-cell">${d.przez}</div>
+          <div class="table-cell">${d.poc}</div>
+          <div class="table-cell">${d.godzina}</div>
+          <div class="table-cell">${d.opoznienie}</div>
+          <div class="table-cell">${d.peron}</div>
+        `;
+        rowsContainer.appendChild(row);
+      });
+    }
+
+    function renderEditors() {
+      editorsContainer.innerHTML = "";
+      data.forEach((d, i) => {
+        const editor = document.createElement("div");
+        editor.className = "editor";
+        editor.innerHTML = `
+          <div><button class="auto-edit" disabled>AUTO-EDYCJA</button> TOR ${TOR_MAP[i]}</div>
+          <input placeholder="Do stacji" id="dest${i}" value="">
+          <input placeholder="Przez" id="przez${i}" value="">
+          <input placeholder="Pociąg" id="poc${i}" value="">
+          <input placeholder="Godzina" id="godzina${i}" value="">
+          <input class="yellow" placeholder="Tablica o godz." id="tablica${i}" value="">
+          <input placeholder="Opóźnienie" id="opoznienie${i}" value="">
+          <span id="kasowanie${i}" class="red-text"></span>
+          <button class="transmit-btn" onclick="transmit(${i})">TRANSMISJA</button>
+          <button class="clear-btn" onclick="clearData(${i})">WYCZYŚĆ</button>
+        `;
+        editorsContainer.appendChild(editor);
+      });
+    }
+
+    function transmit(i) {
+      const dest = document.getElementById(`dest${i}`).value;
+      const przez = document.getElementById(`przez${i}`).value;
+      const poc = document.getElementById(`poc${i}`).value;
+      const godzina = document.getElementById(`godzina${i}`).value;
+      const opoznienie = parseInt(document.getElementById(`opoznienie${i}`).value || 0);
+      const tablica = document.getElementById(`tablica${i}`).value;
+
+      let kasowanie = "";
+      if (godzina) {
+        const time = new Date("1970-01-01T" + godzina);
+        time.setMinutes(time.getMinutes() + 5 + opoznienie);
+        kasowanie = time.toTimeString().substring(0, 8);
+        document.getElementById(`kasowanie${i}`).textContent = `Automatyczne kasowanie o godz.: ${kasowanie}`;
+      }
+
+      data[i] = {
+        dest,
+        przez,
+        poc,
+        godzina,
+        opoznienie: opoznienie.toString(),
+        peron: PERON_MAP[i].toString(),
+        kasowanie
+      };
+      renderDisplay();
+    }
+
+    function clearData(i) {
+      document.getElementById(`dest${i}`).value = "";
+      document.getElementById(`przez${i}`).value = "";
+      document.getElementById(`poc${i}`).value = "";
+      document.getElementById(`godzina${i}`).value = "";
+      document.getElementById(`opoznienie${i}`).value = "";
+      document.getElementById(`tablica${i}`).value = "";
+      document.getElementById(`kasowanie${i}`).textContent = "";
+      data[i] = { dest: "", przez: "", poc: "", godzina: "", opoznienie: "", peron: PERON_MAP[i].toString(), kasowanie: "" };
+      renderDisplay();
+    }
+
+    // Inicjalizacja
+    setInterval(updateClock, 1000);
+    updateClock();
+    renderDisplay();
+    renderEditors();
+  </script></body>
+</html>
