@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Generator Numerów Pociągów JSK</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      text-align: center;
+      padding: 40px;
+    }
+    select, button {
+      font-size: 18px;
+      margin: 10px;
+      padding: 6px 12px;
+    }
+    .output {
+      margin-top: 25px;
+      font-size: 36px;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h2>Generator Numerów Pociągów JSK</h2>
+
+  <label for="type">Rodzaj relacji</label>
+  <select id="type" onchange="updateStations()">
+    <option value="">-- wybierz --</option>
+    <option value="4">Stacja - Stacja</option>
+    <option value="5">Stacja - Punkt Z/O, lub odwrotnie</option>
+  </select><br>
+
+  <label for="prefix">Przedrostek:</label>
+  <select id="prefix">
+    <option value="">(brak)</option>
+    <option value="ROB">Roboczy</option>
+    <option value="RAT">Ratunkowy</option>
+    <option value="TG">Techniczno-Gospodarczy</option>
+    <option value="L">Lokomotywa luzem</option>
+  </select><br>
+
+  <label for="from">Skąd:</label>
+  <select id="from" onchange="updateDestinations()"></select><br>
+
+  <label for="to">Dokąd:</label>
+  <select id="to"></select><br>
+
+  <label for="kind">Rodzaj pociągu:</label>
+  <select id="kind">
+    <option value="luzak">Lokomotywa luzem</option>
+    <option value="skałowy">Pociąg skałowy</option>
+    <option value="zamułkowy">Pociąg zamułkowy - piasek, drobna skała</option>
+    <option value="zdawczy">Pociąg zdawczy - brutto, węglarki, talboty, materiały</option>
+    <option value="roboczy">Pociąg roboczy</option>
+  </select><br>
+
+  <button onclick="generate()">Generuj numer</button>
+  <div class="output" id="result">----</div>
+
+  <script>
+    const stations4 = {
+      "0": "Pniówek",
+      "3": "Zofiówka",
+      "4": "Jastrzębie",
+	  "5": "Elektrownia Rybnik",
+      "9": "Borynia"
+    };
+
+    const stations5 = {
+      "0": "Pniówek",
+      "1": "Rybnik Towarowy",
+      "2": "Pawłowice Górnicze",
+      "3": "Zofiówka",
+      "4": "Jastrzębie",
+	  "5": "Elektrownia Rybnik",
+      "9": "Borynia"
+    };
+
+    const stacje = ["0", "3", "4", "5", "9"];
+    const punkty = ["1", "2"];
+
+    function updateStations() {
+      const type = document.getElementById("type").value;
+      const fromSelect = document.getElementById("from");
+      const toSelect = document.getElementById("to");
+
+      fromSelect.innerHTML = '<option value="">-- wybierz --</option>';
+      toSelect.innerHTML = '<option value="">-- wybierz --</option>';
+
+      const source = type === "5" ? stations5 : stations4;
+      for (const key in source) {
+        const opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = source[key];
+        fromSelect.appendChild(opt);
+      }
+    }
+
+    function updateDestinations() {
+      const type = document.getElementById("type").value;
+      const from = document.getElementById("from").value;
+      const toSelect = document.getElementById("to");
+
+      toSelect.innerHTML = '<option value="">-- wybierz --</option>';
+      const source = type === "5" ? stations5 : stations4;
+
+      for (const key in source) {
+        let canAdd = true;
+
+        if (type === "5") {
+          if (punkty.includes(from)) {
+            if (punkty.includes(key)) canAdd = false;
+          } else if (stacje.includes(from)) {
+            if (stacje.includes(key)) canAdd = false;
+          }
+        }
+
+        if (key === from) canAdd = false;
+
+        if (canAdd) {
+          const opt = document.createElement("option");
+          opt.value = key;
+          opt.textContent = source[key];
+          toSelect.appendChild(opt);
+        }
+      }
+    }
+
+    function generate() {
+      const type = document.getElementById("type").value;
+      const from = document.getElementById("from").value;
+      const to = document.getElementById("to").value;
+      const prefix = document.getElementById("prefix").value;
+      const kind = document.getElementById("kind").value;
+
+      if (!from || !to || !type) {
+        document.getElementById("result").textContent = "Uzupełnij wszystkie pola.";
+        return;
+      }
+
+      let number = "";
+
+      if (type === "4") {
+        number += from;
+        number += to;
+        number += Math.floor(Math.random() * 10);
+        number += Math.floor(Math.random() * 10);
+      } else if (type === "5") {
+        number += from;
+        number += from;
+        number += to;
+        number += Math.floor(Math.random() * 10);
+        number += Math.floor(Math.random() * 10);
+      }
+
+      let suffix = "";
+      switch (kind) {
+        case "luzak": suffix = getRandomInRange(1, 9); break;
+        case "skałowy": suffix = getRandomInRange(10, 29); break;
+        case "zamułkowy": suffix = getRandomInRange(30, 39); break;
+        case "zdawczy": suffix = getRandomInRange(40, 89); break;
+        case "roboczy": suffix = getRandomInRange(90, 99); break;
+      }
+      suffix = suffix.toString().padStart(2, '0');
+      number = number.slice(0, -2) + suffix;
+
+      const finalResult = (prefix ? prefix + "-" : "") + number;
+      document.getElementById("result").textContent = finalResult;
+    }
+
+    function getRandomInRange(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+  </script>
+</body>
+</html>
