@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Generator Numerów Pociągów InfraSilesia</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      text-align: center;
+      padding: 40px;
+    }
+    select, button {
+      font-size: 18px;
+      margin: 10px;
+      padding: 6px 12px;
+    }
+    .output {
+      margin-top: 25px;
+      font-size: 36px;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <p> Numer ma charakter XXXYY. Gdzie XXX to numer adresata, a YY to kolejny numer nadania przesyłki do adresata </p>
+  <h2>Generator Numerów Pociągów InfraSilesia</h2>
+
+  <label for="category">Wybierz: Pociąg/Manewr (P/M):</label>
+  <select id="category" onchange="updateOptions()">
+    <option value="">-- wybierz --</option>
+    <option value="P">P</option>
+    <option value="M">M</option>
+  </select>
+  <br>
+
+  <label for="prefix" id="prefix-label" style="display:none;">Wybierz adresata:</label>
+  <select id="prefix" style="display:none;" onchange="showSuffixSelect()"></select>
+  <br>
+
+  <label for="suffix" id="suffix-label" style="display:none;">Typ pociągu / pojazdu:</label>
+  <select id="suffix" style="display:none;">
+    <option value="">Zwykły</option>
+    <option value="A">Ratownictwo techniczne</option>
+    <option value="E">Utrzymanie sieci trakcyjnej</option>
+    <option value="L">Lokomotywa luzem/option>
+    <option value="R">Utrzymanie infrastruktury</option>
+    <option value="C">Pojazd pomocniczy</option>
+  </select>
+  <br>
+
+  <button onclick="generateNumber()">Generuj liczbę</button>
+
+  <div class="output" id="result">-----</div>
+
+  <script>
+    function updateOptions() {
+      const category = document.getElementById("category").value;
+      const prefixSelect = document.getElementById("prefix");
+      const label = document.getElementById("prefix-label");
+
+      // Wyczyść poprzednie opcje
+      prefixSelect.innerHTML = "";
+      hideSuffixSelect();
+
+      if (category === "P") {
+		addOption("755", "Boguszowice Bg");
+		addOption("756", "Boguszowice Bg-1");
+		addOption("754", "Boguszowice Bg-2");
+		addOption("753", "Boguszowice Bg-3");
+		addOption("771", "Boguszowice Bg-4");
+		addOption("764", "Borynia BrB");
+		addOption("401", "Bór Górny");
+		addOption("415", "Dąbrowa");
+		addOption("829", "Elektrownia Jaworzno I TAURON Wytwarzanie");
+		addOption("830", "Elektrownia Jaworzno III TAURON Wytwarzanie JEC");
+		addOption("832", "Elektrownia Jaworzno III TAURON Wytwarzanie JEB");
+		addOption("419", "Hołdunów");
+		addOption("201", "Jęzor Centralny JCA");
+        addOption("209", "Jęzor Centralny JCC");
+		addOption("417", "Kosztowy");
+		addOption("758", "KWK Chwałowice Chw");
+		addOption("772", "KWK Chwałowice Chw-1");
+		addOption("774", "KWK Chwałowice Chw-2");
+		addOption("757", "KWK Jankowice JnA");
+		addOption("768", "KWK Jankowice JnA-1");
+		addOption("767", "KWK Jankowice JnA-2");
+		addOption("776", "KWK Jankowice JnA-3");
+		addOption("759", "KWK Marcel KM");
+		addOption("766", "KWK Marcel KM-1");
+		addOption("763", "Marklowice MrB");
+		addOption("215", "PG Infrastruktura Szczakowa Północ");
+		addOption("696", "Polski Gaz S.A. SCN");
+		addOption("762", "Radlin Obszary RaO");
+		addOption("752", "Rybnik Towarowy RTB");
+		addOption("760", "Wodzisław Śląski WSA");
+		addOption("637", "Węgiel ZG Sobieski TAURON Wydobycie");
+		addOption("638", "Kamień ZG Sobieski TAURON Wydobycie");
+        prefixSelect.style.display = "inline-block";
+        label.style.display = "inline-block";
+      } else if (category === "M") {
+		addOption("755", "Boguszowice Bg");
+		addOption("756", "Boguszowice Bg-1");
+		addOption("754", "Boguszowice Bg-2");
+		addOption("753", "Boguszowice Bg-3");
+		addOption("771", "Boguszowice Bg-4");
+		addOption("211", "CET Jęzor");
+		addOption("218", "CET Szczakowa Północ");
+		addOption("204", "EXILA Jęzor");
+		addOption("201", "Jęzor Centralny JCA");
+        addOption("209", "Jęzor Centralny JCC");
+		addOption("765", "Koksownia Radlin");
+		addOption("758", "KWK Chwałowice Chw");
+		addOption("772", "KWK Chwałowice Chw-1");
+		addOption("774", "KWK Chwałowice Chw-2");
+		addOption("773", "KWK Chwałowice Zwały Kamienia");
+		addOption("757", "KWK Jankowice JnA");
+		addOption("768", "KWK Jankowice JnA-1");
+		addOption("767", "KWK Jankowice JnA-2");
+		addOption("776", "KWK Jankowice JnA-3");
+		addOption("769", "KWK Jankowice Północ");
+		addOption("770", "KWK Jankowice Szyb VI ");
+		addOption("759", "KWK Marcel KM");
+		addOption("766", "KWK Marcel KM-1");
+		addOption("206", "PCC Intermodal");
+		addOption("205", "Tabor Dębica Jęzor");
+        prefixSelect.style.display = "inline-block";
+        label.style.display = "inline-block";
+      } else {
+        prefixSelect.style.display = "none";
+        label.style.display = "none";
+      }
+    }
+
+    function addOption(value, text) {
+      const option = document.createElement("option");
+      option.value = value;
+      option.text = text;
+      document.getElementById("prefix").appendChild(option);
+    }
+
+    function showSuffixSelect() {
+      document.getElementById("suffix").style.display = "inline-block";
+      document.getElementById("suffix-label").style.display = "inline-block";
+    }
+
+    function hideSuffixSelect() {
+      document.getElementById("suffix").style.display = "none";
+      document.getElementById("suffix-label").style.display = "none";
+    }
+
+    function generateNumber() {
+      const category = document.getElementById("category").value;
+      const prefix = document.getElementById("prefix").value;
+      const suffix = document.getElementById("suffix").value;
+
+      if (!prefix) {
+        document.getElementById("result").textContent = "Wybierz adresata!";
+        return;
+      }
+
+      const totalLength = 5;
+      const digitsToAdd = totalLength - prefix.length;
+      let middle = "";
+
+      for (let i = 0; i < digitsToAdd; i++) {
+        middle += Math.floor(Math.random() * 10);
+      }
+
+      const fullNumber = (category === "M" ? "M" : "") + prefix + middle + suffix;
+      document.getElementById("result").textContent = fullNumber;
+    }
+  </script>
+</body>
+</html>
