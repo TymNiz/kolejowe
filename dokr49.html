@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Dziennik przejazdów</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid black;
+      text-align: center;
+      padding: 4px;
+      overflow: hidden;
+      word-wrap: break-word;
+    }
+    input {
+      box-sizing: border-box;
+      font-size: 14px;
+      padding: 2px;
+    }
+    .small-input {
+      width: 35px;
+    }
+    .wide-input {
+      width: 100%;
+    }
+    #formContainer {
+      margin-bottom: 20px;
+    }
+    col.godz, col.min {
+      width: 35px;
+    }
+    col.nr {
+      width: 100px;
+    }
+    col.uwagi {
+      width: 200px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Dziennik przejazdów</h2>
+  <div id="formContainer">
+    <form id="entryForm">
+      <label>Numer pociągu: <input name="nr" required></label>
+      <label>Otrzymanie zawiadomienia - godz.: <input name="zawiadomienieGodz" class="small-input" required></label>
+      <label>min.: <input name="zawiadomienieMin" class="small-input" required></label>
+      <label>Wyjazd - godz.: <input name="wyjazdGodz" class="small-input" required></label>
+      <label>min.: <input name="wyjazdMin" class="small-input" required></label>
+      <label>Zamknięcie - godz.: <input name="zamkniecieGodz" class="small-input" required></label>
+      <label>min.: <input name="zamkniecieMin" class="small-input" required></label>
+      <label>Przejazd - godz.: <input name="przejazdGodz" class="small-input" required></label>
+      <label>min.: <input name="przejazdMin" class="small-input" required></label>
+      <label>Uwagi: <input name="uwagi" class="wide-input"></label>
+      <button type="submit">Dodaj wpis</button>
+      <button type="button" onclick="exportToJson()">Zapisz do pliku</button>
+      <input type="file" id="importFile" accept="application/json" onchange="importFromJson(event)">
+    </form>
+  </div>
+
+  <table>
+    <colgroup>
+      <col class="nr">
+      <col class="godz"><col class="min">
+      <col class="godz"><col class="min">
+      <col class="godz"><col class="min">
+      <col class="godz"><col class="min">
+      <col class="uwagi">
+    </colgroup>
+    <thead>
+      <tr>
+        <th rowspan="3">Numer pociągu</th>
+        <th colspan="8">Czas</th>
+        <th rowspan="3">Uwagi</th>
+      </tr>
+      <tr>
+        <th colspan="2">Otrzymania<br>Zawiadomienia</th>
+        <th colspan="2">Przewidywanego<br>Wyjazdu pociągu</th>
+        <th colspan="2">Zamknięcia<br>Przejazdu</th>
+        <th colspan="2">Przejazdu<br>Pociągu</th>
+      </tr>
+      <tr>
+        <th>godz.</th><th>min.</th>
+        <th>godz.</th><th>min.</th>
+        <th>godz.</th><th>min.</th>
+        <th>godz.</th><th>min.</th>
+      </tr>
+      <tr>
+        <th>1</th>
+        <th colspan="2">2</th>
+        <th colspan="2">3</th>
+        <th colspan="2">4</th>
+        <th colspan="2">5</th>
+        <th>6</th>
+      </tr>
+    </thead>
+    <tbody id="journalBody">
+    </tbody>
+  </table>
+
+  <script>
+    const form = document.getElementById('entryForm');
+    const tbody = document.getElementById('journalBody');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const data = new FormData(form);
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${data.get('nr')}</td>
+        <td>${data.get('zawiadomienieGodz')}</td>
+        <td>${data.get('zawiadomienieMin')}</td>
+        <td>${data.get('wyjazdGodz')}</td>
+        <td>${data.get('wyjazdMin')}</td>
+        <td>${data.get('zamkniecieGodz')}</td>
+        <td>${data.get('zamkniecieMin')}</td>
+        <td>${data.get('przejazdGodz')}</td>
+        <td>${data.get('przejazdMin')}</td>
+        <td>${data.get('uwagi')}</td>
+      `;
+      tbody.appendChild(row);
+      form.reset();
+    });
+
+    function exportToJson() {
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      const data = rows.map(row => Array.from(row.children).map(td => td.textContent));
+      const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'dziennik.json';
+      link.click();
+    }
+
+    function importFromJson(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const data = JSON.parse(e.target.result);
+        tbody.innerHTML = '';
+        data.forEach(rowData => {
+          const row = document.createElement('tr');
+          row.innerHTML = rowData.map(cell => `<td>${cell}</td>`).join('');
+          tbody.appendChild(row);
+        });
+      };
+      reader.readAsText(file);
+    }
+  </script>
+</body>
+</html>
