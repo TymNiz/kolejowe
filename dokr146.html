@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Dziennik Ruchu</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .dziennik {
+      margin-bottom: 60px;
+      border: 2px solid #000;
+      padding: 10px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid black;
+      text-align: center;
+      padding: 4px;
+    }
+    input[type="text"] {
+      font-size: 14px;
+      padding: 2px;
+      margin: 2px;
+    }
+    .godz, .min { width: 35px; }
+    .uwagi { width: 220px; }
+    .nr { width: 60px; }
+    .tor { width: 30px; }
+    .dr { width: 20px; }
+    form { margin-bottom: 10px; }
+    h2 { margin-top: 30px; }
+    .formularzPolecenia {
+      margin-top: 10px;
+      background: #f9f9f9;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+    .formularzPolecenia input {
+      display: inline-block;
+      margin: 5px;
+    }
+    .formulacja {
+      margin-bottom: 5px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+<a href="dok.html"> POWRÓT </a> <br>
+  <h1>Dziennik Ruchu</h1>
+
+  <div id="kontenerSzlakow"></div>
+
+  <script>
+    const maksSzlakow = 6;
+    let ile = prompt("Ile szlaków? (1–6)");
+    ile = parseInt(ile);
+
+    if (isNaN(ile) || ile < 1 || ile > maksSzlakow) {
+      alert("Wprowadź liczbę od 1 do 6.");
+    } else {
+      const kontener = document.getElementById("kontenerSzlakow");
+
+      for (let i = 1; i <= ile; i++) {
+        const dziennik = document.createElement("div");
+        dziennik.className = "dziennik";
+
+        dziennik.innerHTML = `
+          <h2>Szlak ${i}</h2>
+          Szlak/Odstęp z i do: <input type="text" style="width:300px;"><br>
+
+          <form class="formWjazd">
+            <input required placeholder="Nr pociągu" class="numer">
+            <input required placeholder="Nr toru" class="wjazd3">
+            <input required placeholder="Dw. g." class="wjazd4g godz">
+            <input required placeholder="Dw. m." class="wjazd4m min">
+            <input required placeholder="Pod. g." class="wjazd5g godz">
+            <input required placeholder="Pod. m." class="wjazd5m min">
+            <input required placeholder="Ppr. g." class="wjazd6g godz">
+            <input required placeholder="Ppr. m." class="wjazd6m min">
+            <input placeholder="Uwagi" class="wjazd7 uwagi">
+            ${[1,2,3,4,5,6].map(n => `<input placeholder="Dr${n}" class="dr${n} dr">`).join('')}
+            <button type="submit">Dodaj wpis</button>
+          </form>
+
+          <table class="tabelaWjazdy">
+            <thead>
+              <tr>
+                <th colspan="2">Nr pociągu</th>
+                <th rowspan="2">Tor sta-<br>cyjny</th>
+                <th colspan="2">Droga<br>wolna</th>
+                <th colspan="2">Pociąg<br>odjechał</th>
+                <th colspan="2">Pociąg<br>Przyjechał</th>
+                <th rowspan="2" class="uwagi">Uwagi</th>
+                <th colspan="6">O jeździe pociągu<br>zawiadomiono dróżników<br>przejazdowych</th>
+              </tr>
+              <tr>
+                <th class="nr">nparz.</th>
+                <th class="nr">parz.</th>
+                <th class="godz">g.</th><th class="min">m.</th>
+                <th class="godz">g.</th><th class="min">m.</th>
+                <th class="godz">g.</th><th class="min">m.</th>
+                <th class="dr"></th><th class="dr"></th><th class="dr"></th>
+                <th class="dr"></th><th class="dr"></th><th class="dr"></th>
+              </tr>
+              <tr>
+                <th>1</th><th>2</th><th>3</th>
+                <th colspan="2">4</th><th colspan="2">5</th><th colspan="2">6</th>
+                <th>7</th><th colspan="6">8</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        `;
+
+        kontener.appendChild(dziennik);
+
+        const form = dziennik.querySelector(".formWjazd");
+        const tbody = dziennik.querySelector("tbody");
+
+        form.addEventListener("submit", function(e) {
+          e.preventDefault();
+          const numer = form.querySelector(".numer").value;
+          const tor = form.querySelector(".wjazd3").value;
+          const dwg = form.querySelector(".wjazd4g").value;
+          const dwm = form.querySelector(".wjazd4m").value;
+          const odg = form.querySelector(".wjazd5g").value;
+          const odm = form.querySelector(".wjazd5m").value;
+          const przg = form.querySelector(".wjazd6g").value;
+          const przm = form.querySelector(".wjazd6m").value;
+          const uwagi = form.querySelector(".wjazd7").value;
+          const dr = [...Array(6).keys()].map(n => form.querySelector(`.dr${n+1}`).value);
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${parseInt(numer)%2 ? numer : ""}</td>
+            <td>${parseInt(numer)%2 ? "" : numer}</td>
+            <td>${tor}</td>
+            <td>${dwg}</td><td>${dwm}</td>
+            <td>${odg}</td><td>${odm}</td>
+            <td>${przg}</td><td>${przm}</td>
+            <td>${uwagi}</td>
+            ${dr.map(d => `<td>${d}</td>`).join("")}
+          `;
+          tbody.appendChild(tr);
+          form.reset();
+        });
+
+        // P O L E C E N I A  S P E C J A L N E
+        const btn = document.createElement("button");
+        btn.textContent = "Dodaj polecenie specjalne";
+        btn.type = "button";
+        btn.style.marginTop = "10px";
+        dziennik.appendChild(btn);
+
+        const div = document.createElement("div");
+        dziennik.appendChild(div);
+
+        btn.addEventListener("click", () => {
+          div.innerHTML = `
+            <select>
+              <option value="">-- Wybierz polecenie --</option>
+              <option value="przyjmij">Przyjmij dyżur</option>
+              <option value="zdaj">Zdaj dyżur</option>
+              <option value="wprtzp">Wprowadź TZP</option>
+			  <option value="odwtzp">Odwołaj TZP</option>
+			  <option value="zamtor">Zamknij Tor</option>
+			  <option value="otwtor">Otwórz Tor</option>
+			  <option value="wprowrjd">Wprowadzić ruch jednot. dwukier.</option>
+			  <option value="wprrjd">Wprowadzam ruch jednot. dwukier.</option>
+			  <option value="przywrd">Przywracam ruch dwukierunkowy</option>
+			  <option value="obatoryprzywrd">Przy czynnych obu torach przywracam ruch dwukier.</option>
+			  <option value="przywrj">Przywracam ruch jednokierunkowy</option>
+			  <option value="zabrel">Zabraniam ruchu dla trakcji elektrycznej</option>
+			  <option value="przywel">Przywracam ruch dla trakcji elektrycznej</option>
+            </select>
+            <div class="formularzPolecenia"></div>
+          `;
+          const select = div.querySelector("select");
+          const formDiv = div.querySelector(".formularzPolecenia");
+
+          select.addEventListener("change", () => {
+            formDiv.innerHTML = "";
+            const typ = select.value;
+            if (!typ) return;
+
+            const wzory = {
+              przyjmij: {
+                szablon: "Dnia {data} o godzinie {godzina} dyżur przyjąłem ISEDR {isedr}.",
+                pola: ["data", "godzina", "isedr"]
+              },
+              zdaj: {
+                szablon: "Dnia {data} o godzinie {godzina} dyżur zdałem ISEDR {isedr}.",
+                pola: ["data", "godzina", "isedr"]
+              },
+              wprtzp: {
+                szablon: "O godzinie {godzina} wprowadzam telefoniczne zapowiadanie pociągów po torze numer {tor} od {od} do {do} z powodu {powod}. Nadał ISEDR {nad} odebrał ISEDR {odb}.",
+                pola: ["godzina", "tor", "od", "do", "powod", "nad", "odb"]
+              },
+			  odwtzp: {
+				szablon: "O godzinie {godzina} odwołuję telefoniczne zapowiadanie pociągów po torze numer {tor} od {od} do {do}. Nadał ISEDR {nad} odebrał ISEDR {odb}.",
+				pola: ["godzina", "tor", "od", "do", "nad", "odb"]
+			  },
+			  zamtor: {
+				szablon: "Tor numer {tor} od {od} do {do} zamknięty od godziny {godzina} z powodu {powod}. Nadał ISEDR {nad} odebrał ISEDR {odb}.",
+				pola: ["tor", "od", "do", "godzina", "powod", "nad", "odb"]
+			  },
+			  otwtor: {
+				szablon: "Tor numer {tor} od {od} do {do} otwarty o godzinie {godzina} z powodu {powod}. Nadał ISEDR {nad} odebrał ISEDR {odb}.",
+				pola: ["tor", "od", "do", "godzina", "powod", "nad", "odb"]
+			  },
+			  wprowrjd: {
+				szablon: "Wprowadzić ruch jednotorowy dwukierunkowy od {od} do {do} po torze numer {tor}.",
+				pola: ["od", "do", "tor"]
+			  },
+			  wprrjd: {
+				szablon: "Od {od} do {do} wprowadzam ruch jednotorowy dwukierunkowy po torze numer {tor} po którym ostatni pociąg {numer} odjechał o godzinie {godzina}. Nadał ISEDR {nad} odebrał ISEDR {odb}.",
+				pola: ["od", "do", "tor", "numer", "godzina", "nad", "odb"]
+			  },
+			  przywrd: {
+				szablon: "Przywracam ruch dwutorowy od {od} do {do} o godzinie {godzina}. Nadał ISEDR {nad} odebrał ISEDR {odb}.",
+				pola: ["od", "do", "godzina", "nad", "odb"]
+			  },
+			  obatoryprzywrd: {
+				szablon: "Przy czynnych obu torach wprowadzam od {od} do {do} ruch dwukierunkowy po torze numer {tor} po którym ostatni pociąg {numer} odjechał o godzinie {godzina}. Nadał ISEDR {nad} odebrał ISEDR {odb}.",
+				pola: ["od", "do", "tor", "numer", "godzina", "powod", "nad", "odb"]
+			  },
+			  przywrj: {
+				szablon: "Przywracam ruch jednokierunkowy po torze numer {tor} od {od} do {do} o godzinie {godzina}. Nadał ISEDR {nad} odebrał ISEDR {odb}.",
+				pola: ["tor", "od", "do", "godzina", "nad", "odb"]
+			  },
+			  zabrel: {
+				szablon: "Tor numer {tor} od {od} do {do} od godziny {godzina} nieprzejezdny dla pociagów z trakcją elektryczną. Nadał ISEDR {nad} odebrał ISEDR {odb}.",
+				pola: ["tor", "od", "do", "godzina", "nad", "odb"]
+			  },
+			  przywel: {
+				szablon: "Po torze numer {tor} od {od} do {do} od godziny {godzina} przywracam ruch trakcją elektryczną. Nadał ISEDR {nad} odebrał ISEDR {odb}.",
+				pola: ["tor", "od", "do", "godzina", "nad", "odb"]
+			  }
+            };
+
+            const { szablon, pola } = wzory[typ];
+
+            const pokaz = document.createElement("div");
+            pokaz.className = "formulacja";
+            pokaz.innerHTML = szablon.replace(/\{(\w+)\}/g, (m, p) => `<b>[${p}]</b>`);
+            formDiv.appendChild(pokaz);
+
+            const inputy = {};
+            pola.forEach(p => {
+              const inp = document.createElement("input");
+              inp.placeholder = p;
+              inp.name = p;
+              formDiv.appendChild(inp);
+              inputy[p] = inp;
+            });
+
+            const ok = document.createElement("button");
+            ok.textContent = "Dodaj do dziennika";
+            ok.type = "button";
+            formDiv.appendChild(ok);
+
+            ok.addEventListener("click", () => {
+              let tekst = szablon;
+              pola.forEach(p => {
+                tekst = tekst.replace(`{${p}}`, inputy[p].value || "...");
+              });
+
+              const tr = document.createElement("tr");
+              const td = document.createElement("td");
+              td.colSpan = 16;
+              td.style.textAlign = "center";
+              td.style.fontStyle = "italic";
+              td.textContent = tekst;
+              tr.appendChild(td);
+              tbody.appendChild(tr);
+              div.innerHTML = "";
+            });
+          });
+        });
+      }
+    }
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Dziennik Ruchu – wiele szlaków</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .dziennik {
+      margin-bottom: 60px;
+      border: 2px solid #000;
+      padding: 10px;
+    }
+    .szlakHeader {
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid black;
+      text-align: center;
+      padding: 4px;
+    }
+    input[type="text"] {
+      font-size: 14px;
+      padding: 2px;
+      margin: 2px;
+    }
+    .godz, .min { width: 35px; }
+    .uwagi { width: 220px; }
+    .nr { width: 60px; }
+    .tor { width: 30px; }
+    .dr { width: 20px; }
+    form { margin-bottom: 10px; }
+    h2 { margin-top: 30px; }
+  </style>
+</head>
+<body>
+
+  <div id="kontenerSzlakow"></div>
+
+  <script>
+    const maksSzlakow = 6;
+    let ile = prompt("Ile szlaków? (1–6)");
+    ile = parseInt(ile);
+
+    if (isNaN(ile) || ile < 1 || ile > maksSzlakow) {
+      alert("Wprowadź liczbę od 1 do 6.");
+    } else {
+      const kontener = document.getElementById("kontenerSzlakow");
+
+      for (let i = 1; i <= ile; i++) {
+        const dziennik = document.createElement("div");
+        dziennik.className = "dziennik";
+
+        dziennik.innerHTML = `
+          <h2>Szlak ${i}</h2>
+          <div class="szlakHeader">
+            Szlak/Odstęp z i do: <input type="text" placeholder="" style="width: 300px;">
+          </div>
+
+          <form class="formWjazd">
+            <input required placeholder="Nr pociągu" class="numer">
+            <input required placeholder="Nr toru" class="wjazd3">
+            <input required placeholder="Dw. g." class="wjazd4g godz">
+            <input required placeholder="Dw. m." class="wjazd4m min">
+            <input required placeholder="Pod. g." class="wjazd5g godz">
+            <input required placeholder="Pod. m." class="wjazd5m min">
+            <input required placeholder="Ppr. g." class="wjazd6g godz">
+            <input required placeholder="Ppr. m." class="wjazd6m min">
+            <input placeholder="Uwagi" class="wjazd7 uwagi">
+            ${[1,2,3,4,5,6].map(n => `<input placeholder="Dr${n}" class="dr${n} dr">`).join('')}
+            <button type="submit">Dodaj wpis</button>
+          </form>
+
+          <table class="tabelaWjazdy">
+            <thead>
+              <tr>
+                <th colspan="2">Nr pociągu</th>
+                <th rowspan="2">Tor sta-<br>cyjny</th>
+                <th colspan="2">Droga<br>wolna</th>
+                <th colspan="2">Pociąg<br>odjechał</th>
+                <th colspan="2">Pociąg<br>Przyjechał</th>
+                <th rowspan="2" class="uwagi">Uwagi</th>
+                <th colspan="6">O jeździe pociągu<br>zawiadomiono dróżników<br>przejazdowych</th>
+              </tr>
+              <tr>
+                <th class="nr">nparz.</th>
+                <th class="nr">parz.</th>
+                <th class="godz">g.</th>
+                <th class="min">m.</th>
+                <th class="godz">g.</th>
+                <th class="min">m.</th>
+                <th class="godz">g.</th>
+                <th class="min">m.</th>
+                <th class="dr"></th><th class="dr"></th><th class="dr"></th>
+                <th class="dr"></th><th class="dr"></th><th class="dr"></th>
+              </tr>
+              <tr>
+                <th>1</th><th>2</th><th>3</th>
+                <th colspan="2">4</th><th colspan="2">5</th><th colspan="2">6</th>
+                <th>7</th><th colspan="6">8</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        `;
+
+        kontener.appendChild(dziennik);
+
+        const form = dziennik.querySelector(".formWjazd");
+        const tbody = dziennik.querySelector("tbody");
+
+        form.addEventListener("submit", function(e) {
+          e.preventDefault();
+          const numer = form.querySelector(".numer").value;
+          const tor = form.querySelector(".wjazd3").value;
+          const dwg = form.querySelector(".wjazd4g").value;
+          const dwm = form.querySelector(".wjazd4m").value;
+          const odg = form.querySelector(".wjazd5g").value;
+          const odm = form.querySelector(".wjazd5m").value;
+          const przg = form.querySelector(".wjazd6g").value;
+          const przm = form.querySelector(".wjazd6m").value;
+          const uwagi = form.querySelector(".wjazd7").value;
+          const dr = [...Array(6).keys()].map(n => form.querySelector(`.dr${n+1}`).value);
+
+          const tr = document.createElement("tr");
+          const td1 = document.createElement("td");
+          const td2 = document.createElement("td");
+          if (parseInt(numer) % 2 === 0) {
+            td1.textContent = "";
+            td2.textContent = numer;
+          } else {
+            td1.textContent = numer;
+            td2.textContent = "";
+          }
+          tr.appendChild(td1);
+          tr.appendChild(td2);
+
+          [tor, dwg, dwm, odg, odm, przg, przm, uwagi, ...dr].forEach(val => {
+            const td = document.createElement("td");
+            td.textContent = val;
+            tr.appendChild(td);
+          });
+
+          tbody.appendChild(tr);
+          form.reset();
+        });
+
+        // Dodaj polecenia specjalne
+        const polecenieBtn = document.createElement("button");
+        polecenieBtn.textContent = "Dodaj polecenie specjalne";
+        polecenieBtn.type = "button";
+        polecenieBtn.style.marginTop = "10px";
+        dziennik.appendChild(polecenieBtn);
+
+        const polecenieDiv = document.createElement("div");
+        dziennik.appendChild(polecenieDiv);
+
+        polecenieBtn.addEventListener("click", () => {
+          polecenieDiv.innerHTML = `
+            <select>
+              <option value="">-- Wybierz polecenie --</option>
+              <option value="przyjmij">Przyjmij dyżur</option>
+              <option value="zdaj">Zdaj dyżur</option>
+              <option value="wprtzp">Wprowadź TZP</option>
+			  <option value="odwtzp">Odwołaj TZP</option>
+			  <option value="zamtor">Zamknij Tor</option>
+			  <option value="otwtor">Otwórz Tor</option>
+			  <option value="wprowrjd">Wprowadzić ruch jednot. dwukier.</option>
+			  <option value="wprrjd">Wprowadzam ruch jednot. dwukier.</option>
+			  <option value="przywrd">Przywracam ruch dwukierunkowy</option>
+			  <option value="obatoryprzywrd">Przy czynnych obu torach przywracam ruch dwukier.</option>
+			  <option value="przywrj">Przywracam ruch jednokierunkowy</option>
+			  <option value="zabrel">Zabraniam ruchu dla trakcji elektrycznej</option>
+			  <option value="przywel">Przywracam ruch dla trakcji elektrycznej</option>
+            </select>
+            <div class="formularzPolecenia"></div>
+          `;
+
+          const select = polecenieDiv.querySelector("select");
+          const formDiv = polecenieDiv.querySelector(".formularzPolecenia");
+
+          select.addEventListener("change", () => {
+            const typ = select.value;
+            formDiv.innerHTML = "";
+            if (typ === "") return;
+
+            let pola = [];
+            let szablon = "";
+
+            if (typ === "przyjmij") {
+              pola = ["data", "godzina", "isedr"];
+              szablon = 'Dnia {data} o godzinie {godzina} dyżur przyjąłem ISEDR {isedr}.';
+            } else if (typ === "zdaj") {
+              pola = ["data", "godzina", "isedr"];
+              szablon = 'Dnia {data} o godzinie {godzina} dyżur zdałem ISEDR {isedr}.';
+            } else if (typ === "wprtzp") {
+              pola = ["godzina", "tor", "od", "do", "powod", "nad", "odb"];
+              szablon = 'O godzinie {godzina} wprowadzam telefoniczne zapowiadanie pociągów po torze numer {tor} od {od} do {do} z powodu {powod}. Nadał ISEDR {nad} odebrał ISEDR {odb}.';
+            } else if (typ === "odwtzp") {
+              pola = ["godzina", "tor", "od", "do", "nad", "odb"];
+              szablon = 'O godzinie {godzina} odwołuję telefoniczne zapowiadanie pociągów po torze numer {tor} od {od} do {do}. Nadał ISEDR {nad} odebrał ISEDR {odb}.';
+            } else if (typ === "zamtor") {
+              pola = ["tor", "od", "do", "godzina", "powod", "nad", "odb"];
+              szablon = 'Tor numer {tor} od {od} do {do} zamknięty od godziny {godzina} z powodu {powod}. Nadał ISEDR {nad} odebrał ISEDR {odb}.';
+            } else if (typ === "otwtor") {
+              pola = ["tor", "od", "do", "godzina", "powod", "nad", "odb"];
+              szablon = 'Tor numer {tor} od {od} do {do} otwarty o godzinie {godzina} z powodu {powod}. Nadał ISEDR {nad} odebrał ISEDR {odb}.';
+            } else if (typ === "wprowrjd") {
+              pola = ["od", "do", "tor"];
+              szablon = 'Wprowadzić ruch jednotorowy dwukierunkowy od {od} do {do} po torze numer {tor}.';
+            }  else if (typ === "wprrjd") {
+              pola = ["od", "do", "tor", "numer", "godzina", "nad", "odb"];
+              szablon = 'Od {od} do {do} wprowadzam ruch jednotorowy dwukierunkowy po torze numer {tor} po którym ostatni pociąg {numer} odjechał o godzinie {godzina}. Nadał ISEDR {nad} odebrał ISEDR {odb}.';
+            }  else if (typ === "przywrd") {
+              pola = ["od", "do", "godzina", "nad", "odb"];
+              szablon = 'Przywracam ruch dwutorowy od {od} do {do} o godzinie {godzina}. Nadał ISEDR {nad} odebrał ISEDR {odb}.';
+            }  else if (typ === "obatoryprzywrd") {
+              pola = ["od", "do", "tor", "numer", "godzina", "powod", "nad", "odb"];
+              szablon = 'Przy czynnych obu torach wprowadzam od {od} do {do} ruch dwukierunkowy po torze numer {tor} po którym ostatni pociąg {numer} odjechał o godzinie {godzina}. Nadał ISEDR {nad} odebrał ISEDR {odb}.';
+            } else if (typ === "przywrj") {
+              pola = ["tor", "od", "do", "godzina", "nad", "odb"];
+              szablon = 'Przywracam ruch jednokierunkowy po torze numer {tor} od {od} do {do} o godzinie {godzina}. Nadał ISEDR {nad} odebrał ISEDR {odb}.';
+            } else if (typ === "zabrel") {
+              pola = ["tor", "od", "do", "godzina", "nad", "odb"];
+              szablon = 'Tor numer {tor} od {od} do {do} od godziny {godzina} nieprzejezdny dla pociagów z trakcją elektryczną. Nadał ISEDR {nad} odebrał ISEDR {odb}.';
+            } else if (typ === "przywel") {
+              pola = ["tor", "od", "do", "godzina", "nad", "odb"];
+              szablon = 'Po torze numer {tor} od {od} do {do} od godziny {godzina} przywracam ruch trakcją elektryczną. Nadał ISEDR {nad} odebrał ISEDR {odb}.';
+            }
+
+
+
+            pola.forEach(p => {
+              const inp = document.createElement("input");
+              inp.placeholder = p;
+              inp.name = p;
+              formDiv.appendChild(inp);
+            });
+
+            const dodaj = document.createElement("button");
+            dodaj.textContent = "Dodaj do dziennika";
+            dodaj.type = "button";
+            formDiv.appendChild(dodaj);
+
+            dodaj.addEventListener("click", () => {
+              const wpisy = {};
+              pola.forEach(p => wpisy[p] = formDiv.querySelector(`[name=${p}]`).value.trim());
+
+              let tekst = szablon;
+              for (const [klucz, wartosc] of Object.entries(wpisy)) {
+                tekst = tekst.replace(`{${klucz}}`, wartosc || "...");
+              }
+
+              const tr = document.createElement("tr");
+              const td = document.createElement("td");
+              td.colSpan = 12;
+              td.textContent = tekst;
+              td.style.textAlign = "center";
+              td.style.fontStyle = "italic";
+              td.className = "specjalne";
+              tr.appendChild(td);
+
+              tbody.appendChild(tr);
+              polecenieDiv.innerHTML = "";
+            });
+          });
+        });
+      }
+    }
+  </script>
+</body>
+</html>
+

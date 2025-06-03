@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Książka przebiegów</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid black;
+      text-align: center;
+      padding: 4px;
+    }
+    input[type="text"] {
+      font-size: 14px;
+      padding: 2px;
+      margin: 2px;
+    }
+    .godz, .min {
+      width: 35px;
+    }
+    .posterunek {
+      width: 60px;
+    }
+    .uwagi {
+      width: 220px;
+    }
+    .nr {
+      width: 40px;
+    }
+    .tor, .okreg {
+      width: 50px;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    h2 {
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+<a href="dok.html"> POWRÓT </a> <br>
+  <h2>Książka przebiegów – wjazdy</h2>
+  <form id="formWjazd">
+    <input required placeholder="Nr pociągu" id="wjazd1">
+    <input required placeholder="Skrót posterunku" id="wjazd2">
+    <input required placeholder="Nr toru" id="wjazd3">
+    <input required placeholder="Okręg" id="wjazd4">
+    <input required placeholder="Pr. g." id="wjazd5g" class="godz">
+    <input required placeholder="Pr. m." id="wjazd5m" class="min">
+    <input required placeholder="Sy. g." id="wjazd6g" class="godz">
+    <input required placeholder="Sy. m." id="wjazd6m" class="min">
+    <input required placeholder="Wj. g." id="wjazd7g" class="godz">
+    <input required placeholder="Wj. m." id="wjazd7m" class="min">
+    <input placeholder="Uwagi" id="wjazd8" class="uwagi">
+    <button type="submit">Dodaj wpis</button>
+  </form>
+
+  <table id="tabelaWjazdy">
+    <thead>
+      <tr>
+        <th colspan="3">Przygotować wjazd</th>
+        <th colspan="3">Wjazd przygotowany<br>(tor wolny)</th>
+        <th colspan="2">Dać sygn. zezwalający<br>na semaforze wjazdowym</th>
+        <th colspan="2">Pociąg wjechał</th>
+        <th rowspan="2" class="uwagi">Uwagi</th>
+      </tr>
+      <tr>
+        <th class="nr">pociągu nr</th>
+        <th class="posterunek">z (skrót sąsiedn. poster. zapow.)</th>
+        <th class="tor">na tor</th>
+        <th class="okreg">w okręgu</th>
+        <th class="godz">g.</th>
+        <th class="min">m.</th>
+        <th class="godz">g.</th>
+        <th class="min">m.</th>
+        <th class="godz">g.</th>
+        <th class="min">m.</th>
+      </tr>
+      <tr>
+        <th>1</th><th>2</th><th>3</th><th>4</th>
+        <th colspan="2">5</th>
+        <th colspan="2">6</th>
+        <th colspan="2">7</th>
+        <th>8</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Książka przebiegów – wyjazdy</h2>
+  <form id="formWyjazd">
+    <input required placeholder="Nr pociągu" id="wyjazd1">
+    <input required placeholder="Skrót posterunku" id="wyjazd2">
+    <input required placeholder="Nr toru" id="wyjazd3">
+    <input required placeholder="Okręg" id="wyjazd4">
+    <input required placeholder="Pr. g." id="wyjazd5g" class="godz">
+    <input required placeholder="Pr. m." id="wyjazd5m" class="min">
+    <input required placeholder="S. g." id="wyjazd6g" class="godz">
+    <input required placeholder="S. m." id="wyjazd6m" class="min">
+    <input required placeholder="Wy. g." id="wyjazd7g" class="godz">
+    <input required placeholder="Wy. m." id="wyjazd7m" class="min">
+    <input placeholder="Uwagi" id="wyjazd8" class="uwagi">
+    <button type="submit">Dodaj wpis</button>
+  </form>
+
+  <table id="tabelaWyjazdy">
+    <thead>
+      <tr>
+        <th colspan="3">Przygotować wyjazd</th>
+        <th colspan="3">Wyjazd przygotowany<br>(tor wolny)</th>
+        <th colspan="2">Dać sygn. zezwalający<br>na semaforze wyjazdowym</th>
+        <th colspan="2">Pociąg wyjechał</th>
+        <th rowspan="2" class="uwagi">Uwagi</th>
+      </tr>
+      <tr>
+        <th class="nr">pociągu nr</th>
+        <th class="posterunek">do (skrót sąsiedn. poster. zapow.)</th>
+        <th class="tor">z toru</th>
+        <th class="okreg">w okręgu</th>
+        <th class="godz">g.</th>
+        <th class="min">m.</th>
+        <th class="godz">g.</th>
+        <th class="min">m.</th>
+        <th class="godz">g.</th>
+        <th class="min">m.</th>
+      </tr>
+      <tr>
+        <th>1</th><th>2</th><th>3</th><th>4</th>
+        <th colspan="2">5</th>
+        <th colspan="2">6</th>
+        <th colspan="2">7</th>
+        <th>8</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    function dodajWiersz(tabelaId, prefix) {
+      const tabela = document.getElementById(tabelaId).querySelector("tbody");
+      const dane = [];
+      for (let i = 1; i <= 4; i++) {
+        dane.push(document.getElementById(prefix + i).value);
+      }
+      for (let i = 5; i <= 7; i++) {
+        dane.push(document.getElementById(prefix + i + 'g').value);
+        dane.push(document.getElementById(prefix + i + 'm').value);
+      }
+      dane.push(document.getElementById(prefix + '8').value);
+
+      const tr = document.createElement("tr");
+      for (let i = 0; i < dane.length; i++) {
+        const td = document.createElement("td");
+        td.textContent = dane[i];
+        tr.appendChild(td);
+      }
+      tabela.appendChild(tr);
+    }
+
+    document.getElementById("formWjazd").addEventListener("submit", function(e) {
+      e.preventDefault();
+      dodajWiersz("tabelaWjazdy", "wjazd");
+      this.reset();
+    });
+
+    document.getElementById("formWyjazd").addEventListener("submit", function(e) {
+      e.preventDefault();
+      dodajWiersz("tabelaWyjazdy", "wyjazd");
+      this.reset();
+    });
+  </script>
+</body>
+</html>
