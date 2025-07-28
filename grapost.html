@@ -42,16 +42,14 @@
   </style>
 </head>
 <body>
-
-  <!-- Powitajka -->
   <div id="start-screen">
     <h1>Witaj w grze!</h1>
     <p>
-      Twoim zadaniem jest odpowiedzenie jakiej nazwie stacji odpowiada wylosowany skrót posterunku.<br>
+      Twoim zadaniem jest odpowiedzenie jakiej nazwie stacji odpowiada wylosowany skrót telegraficzny stacji<br>
       Za każdą poprawną odpowiedź zdobywasz punkt. Gra toczy się do pierwszej pomyłki.<br>
       Spróbuj pobić swój rekord!<br>
-	  UWAGA! W grze zawarte są czynne posterunki zapowiadawcze z województwa śląskiego !Na sieci PKP PLK!.<br>
-	  Mogą być nieliczne braki posterunków. Stan na 06.2025! <br>
+	  UWAGA! Gra objęta jest obszarem województwa śląskiego !z sieci PKP PLK!.<br>
+	  Mogą być nieliczne braki. Stan na 07.2025! <br>
 	  <a href="index.html"> POWRÓT </a>
     </p>
     <button onclick="startGame()">GRAJ</button>
@@ -72,8 +70,6 @@
       <p id="best-time-live">Najlepszy czas: --:--</p>
     </div>
   </div>
-
-  <!-- Koniec gry -->
   <div id="end-screen">
     <h1 id="end-title"></h1>
     <p id="end-message"></p>
@@ -83,409 +79,314 @@
   </div>
 
   <script>
-    const allShortcuts = {
-      "ChiA": "Chałupki",
-      "ChiB": "Chałupki",
-	  "Bry": "Brynów",
-      "Pi": "Panewnik",
-	  "Cw": "Czerwionka",
-      "CwD": "Czerwionka Dębieńsko",
-	  "CwD1": "Czerwionka Dębieńsko",
-      "Dn": "Dębina",
-      "Jk": "Jejkowice",
-      "KL": "Katowice Ligota",
-      "KL1": "Katowice Ligota",
-	  "Km": "Kamień",
-      "Kn": "Knurów",
-	  "Kn1": "Knurów",
-	  "KO": "Katowice Osobowa",
-      "KO1": "Katowice Osobowa",
-      "KRa": "Kuźnia Raciborska",
-      "Kzn": "Krzyżanowice",
-      "Lsz": "Leszczyny",
-      "ŁS": "Łaziska Średnie",
-	  "ŁS2": "Łaziska Średnie",
-	  "ŁS3": "Łaziska Średnie",
-      "Mc": "Mąkołowiec",
-      "Mi -przy Rybniku": "Mikołów",
-      "MJ": "Mikołów Jamna",
-      "Na": "Nędza",
-      "Na1": "Nędza",
-      "Na2": "Nędza",
-      "NWs": "Nędza Wieś",
-      "OJ": "Orzesze Jaśkowice",
-      "OJ1": "Orzesze Jaśkowice",
-      "OlA": "Olza",
-      "OlB": "Olza",
-      "Or": "Orzesze",
-      "Or1": "Orzesze",
-      "PŚ": "Pawłowice Śląskie",
-      "R11": "Racibórz",
-      "RA": "Racibórz",
-      "RA1": "Racibórz",
-      "RA2": "Racibórz",
-	  "RaO": "Radlin Obszary",
-	  "RB": "Racibórz",
-      "RbA": "Rybnik",
-      "RbB": "Rybnik",
-      "RbC": "Rybnik",
-      "RM": "Racibórz Markowice",
-      "RN": "Rybnik Niewiadom",
-	  "RTA": "Rybnik Towarowy",
-      "RTA1": "Rybnik Towarowy",
-      "RTB": "Rybnik Towarowy",
-      "RTD": "Rybnik Towarowy",
-      "RTE": "Rybnik Towarowy",
-      "RTF": "Rybnik Towarowy",
-	  "RTF51": "Rybnik Towarowy",
-	  "RTr": "Rybnik Towarowy",
-      "Ry": "Rydułtowy",
-      "St": "Strumień",
-      "Sta": "Studzionka",
-      "Su": "Sumina",
-	  "Su1": "Sumina",
-      "Ty": "Tychy",
-	  "Ty1": "Tychy",
-	  "Wa": "Warszowice",
-      "WSA": "Wodzisław Śląski",
-      "WSB": "Wodzisław Śląski",
-      "Żo": "Żory",
-      "Raw": "Radoszowy",
-      "RKc": "Ruda Kochłowice",
-      "Hj": "Hajduki",
-	  "RWr": "Ruda Wirek",
-	  "RBi": "Ruda Bielszowice",
-      "RBi1": "Ruda Bielszowice",
-      "ZM": "Zabrze Makoszowy",
-      "ZM1": "Zabrze Makoszowy",
-      "ZMK": "Zabrze Makoszowy Kopalnia",
-      "Miz": "Mizerów",
-	  "Gie": "Gierałtowice",
-      "MPn": "Maciejów Północny",
-	  "GSA": "Gliwice Sośnica",
-	  "GSB": "Gliwice Sośnica",
-      "Gl2": "Gliwice",
-      "GlA": "Gliwice",
-      "GLB": "Gliwice",
-      "GLC": "Gliwice",
-      "GLC23": "Gliwice",
-	  "Szo": "Szobiszowice",
-      "GP": "Gliwice Port",
-	  "GŁ": "Gliwice Łabędy",
-	  "Ta": "Taciszów",
-      "RG": "Rudziniec Gliwicki",
-      "RG1": "Rudziniec Gliwicki",
-      "Pk": "Pyskowice",
-      "Pa": "Paczyna",
-      "To": "Toszek",
-	  "To1": "Toszek",
-      "TP": "Toszek Północ",
-	  "Czr": "Czarków",
-	  "KM": "Krupski Młyn",
-      "Br -przy Lublińcu": "Borowiany",
-      "Dri": "Droniowiczki",
-      "LcA": "Lubliniec",
-      "LcB": "Lubliniec",
-      "Jw": "Jawornica",
-	  "Pwk": "Pawonków",
-      "Csa": "Ciasna",
-	  "Srk": "Sieraków Śląski",
-	  "Kos": "Koszęcin",
-      "Kos1": "Koszęcin",
-      "Rw": "Rusinowice",
-      "Stb": "Strzebiń",
-      "Bor": "Boronów",
-      "Kwc": "Kochanowice",
-	  "Lis": "Lisów",
-      "Lis1": "Lisów",
-	  "Lsw": "Liswarta",
-	  "HN": "Herby Nowe",
-      "HS": "Herby Stare",
-      "HS1": "Herby Stare",
-      "Pn": "Panki",
-      "Kp": "Krzepice",
-      "Ja": "Janinów",
-	  "Kł -przy Herbach": "Kłobuck",
-      "Mi -przy Herbach": "Miedźno",
-	  "Bln": "Blachownia",
-	  "Gn": "Częstochowa Gnaszyn",
-      "CS": "Częstochowa Stradom",
-      "CO": "Częstochowa Osobowa",
-	  "CO1": "Częstochowa Osobowa",
-      "CTA": "Częstochowa Towarowa",
-	  "CTB": "Częstochowa Towarowa",
-	  "CT11": "Częstochowa Towarowa",
-      "Wy": "Wyczerpy",
-      "Rz": "Rząsawa",
-	  "Ck": "Cykarzew",
-      "Rd": "Rudniki koło Częstochowy",
-	  "Rd1": "Rudniki koło Częstochowy",
-	  "Kł -przy Częstochowie": "Kłomnice",
-      "Tk": "Widzów Teklinów",
-      "Ku": "Kucelinka",
-      "CMr": "Częstochowa Mirów",
-      "CMr1": "Częstochowa Mirów",
-      "Pr": "Poraj",
-	  "Ms": "Myszków",
-      "Zw -na północy": "Zawiercie",
-	  "Sw": "Siewierz",
-	  "GW": "Góra Włodowska",
-      "ŁA": "Łazy",
-      "ŁA1": "Łazy",
-      "ŁA3": "Łazy",
-      "ŁB": "Łazy",
-      "ŁB11": "Łazy",
-      "ŁC": "Łazy",
-	  "Pmi": "Przymiarki",
-	  "DZA": "Dąbrowa Górnicza Ząbkowice",
-      "DZB": "Dąbrowa Górnicza Ząbkowice",
-      "DZB2": "Dąbrowa Górnicza Ząbkowice",
-      "DS": "Dąbrowa Górnicza Strzemieszyce",
-      "DP": "Dąbrowa Górnicza Południowa",
-      "DP1": "Dąbrowa Górnicza Południowa",
-	  "DGHK": "Dąbrowa Górnicza Huta Katowice",
-      "DG": "Dąbrowa Górnicza",
-	  "DW": "Dąbrowa Górnicza Wschodnia",
-	  "DTA": "Dąbrowa Górnicza Towarowa",
-      "DTB": "Dąbrowa Górnicza Towarowa",
-      "DTB21": "Dąbrowa Górnicza Towarowa",
-      "DTC": "Dąbrowa Górnicza Towarowa",
-      "Kz -na północy": "Kozioł",
-	  "Kz -na południu": "Kozy",
-      "Sł": "Sławków",
-	  "BŁ": "Będzin Łagisza",
-      "DGP": "Dąbrowa Górnicza Piekło",
-	  "Bn": "Będzin",
-      "SG": "Sosnowiec Główny",
-      "SPł": "Sosnowiec Południowy",
-      "SPł1": "Sosnowiec Południowy",
-      "KSz": "Katowice Szopienice Północne",
-	  "Sk": "Stawiska",
-      "Sk1": "Stawiska",
-	  "Szb": "Szabelnia",
-	  "MwA": "Mysłowice",
-      "MwB": "Mysłowice",
-      "SDn": "Sosnowiec Dańdówka",
-      "Ju": "Juliusz",
-      "SKz": "Sosnowiec Kazimierz",
-      "SKz2": "Sosnowiec Kazimierz",
-	  "Dra": "Dorota",
-      "SMa": "Sosnowiec Maczki",
-	  "SMa1": "Sosnowiec Maczki",
-	  "Dł": "Długoszyn",
-      "JSA": "Jaworzno Szczakowa",
-      "JSA1": "Jaworzno Szczakowa",
-      "JSB": "Jaworzno Szczakowa",
-      "JSC": "Jaworzno Szczakowa",
-      "JSE": "Jaworzno Szczakowa",
-	  "JSR": "Jaworzno Szczakowa",
-      "BG": "Borowa Górka",
-	  "Pc -na północy": "Pieczyska",
-      "MB": "Mysłowice Brzezinka",
-      "MKsA": "Mysłowice Kosztowy",
-      "MKsB": "Mysłowice Kosztowy",
-      "MKsB1": "Mysłowice Kosztowy",
-	  "MKsC": "Mysłowice Kosztowy",
-      "Im": "Imielin",
-	  "Im1": "Imielin",
-	  "CSl": "Chełm Śląski",
-      "NB": "Nowy Bieruń",
-      "CD": "Czechowice Dziedzice",
-      "Psz": "Pszczyna",
-      "ZC12": "Zabrzeg Czarnolesie",
-      "ZCA": "Zabrzeg Czarnolesie",
-	  "ZCB": "Zabrzeg Czarnolesie",
-      "ZCR": "Zabrzeg Czarnolesie",
-	  "Br -Przy Czechowicach": "Bronów",
-	  "Chy": "Chybie",
-      "Chy1": "Chybie",
-      "Pch": "Pruchna",
-      "Pch1": "Pruchna",
-      "Zeb": "Zebrzydowice",
-      "Zeb1": "Zebrzydowice",
-	  "Zeb2": "Zebrzydowice",
-      "Zeb3": "Zebrzydowice",
-	  "Zeb5": "Zebrzydowice",
-      "Kc": "Kaczyce",
-      "CMl": "Cieszyn Marklowice",
-      "Cn": "Cieszyn",
-      "Ut": "Ustroń",
-	  "WG": "Wisła Głębce",
-      "UP": "Ustroń Polana",
-	  "WU": "Wisła Uzdrowisko",
-	  "Sko": "Skoczów",
-      "Sko1": "Skoczów",
-      "Pc -na południu": "Pierściec",
-      "Bi": "Bieniowiec",
-      "CDd": "Czechowice Dziedzice Południowe",
-      "CDd1": "Czechowice Dziedzice Południowe",
-	  "BKm": "Bielsko Biała Komorowice",
-      "BB": "Bielsko Biała Główna",
-	  "BBW": "Bielsko Biała Wschód",
-	  "BLp": "Bielsko Biała Lipnik",
-      "BBL": "Bielsko Biała Leszczyny",
-	  "BBL1": "Bielsko Biała Leszczyny",
-      "WB": "Wilkowice Bystra",
-	  "Że": "Żywiec",
-      "Mi -przy Żywcu": "Milówka",
-      "Rj": "Rajcza",
-      "Zw -na południu": "Zwardoń",
-      "Sl": "Sól",
-	  "KKs": "Katowice Kostuchna",
-      "KOc": "Katowice Ochojec",
-	  "SSc": "Staszic",
-      "KMB": "Katowice Muchowiec",
-      "KTC": "Katowice Towarowa",
-	  "CB": "Chorzów Batory",
-      "CB1": "Chorzów Batory",
-      "RCA": "Ruda Chebzie",
-      "RCB": "Ruda Chebzie",
-      "Zz": "Zabrze",
-      "SiS": "Siemianowice Śląskie",
-	  "SiS1": "Siemianowice Śląskie",
-      "SiS2": "Siemianowice Śląskie",
-	  "Bt": "Bytom",
-      "BBk": "Bytom Bobrek",
-      "ZBA": "Zabrze Biskupice",
-      "ZBB": "Zabrze Biskupice",
-      "PSSB": "Piekary Śląskie Szarlej",
-	  "NS": "Nakło Śląskie",
-      "NS1": "Nakło Śląskie",
-	  "Klt": "Kalety",
-      "Klt1": "Kalety",
-      "Stb": "Strzebiń",
-      "TGA": "Tarnowskie Góry",
-	  "TGA1": "Tarnowskie Góry",
-      "TGA7": "Tarnowskie Góry",
-	  "TGm6": "Tarnowskie Góry",
-	  "TGm14": "Tarnowskie Góry",
-	  "TGm12": "Tarnowskie Góry",
-	  "TGB": "Tarnowskie Góry",
-      "TGD": "Tarnowskie Góry",
-	  "TGm31": "Tarnowskie Góry",
-      "TGC": "Tarnowskie Góry",
-      "TGm15": "Tarnowskie Góry",
-      "TGC23": "Tarnowskie Góry",
-	  "TGm32": "Tarnowskie Góry",
-      "TGE41": "Tarnowskie Góry",
-	  "TGE": "Tarnowskie Góry",
-	  "T": "Tworóg"
-    };
+  const allShortcuts = {
+      "Chi": ["Chałupki"],
+	  "Bry": ["Brynów"],
+      "Pi": ["Panewnik"],
+	  "Cw": ["Czerwionka"],
+      "CwD": ["Czerwionka Dębieńsko"],
+      "Dn": ["Dębina"],
+      "Jk": ["Jejkowice"],
+      "KL": ["Katowice Ligota"],
+	  "Km": ["Kamień"],
+      "Kn": ["Knurów"],
+	  "KO": ["Katowice Osobowa"],
+      "KRa": ["Kuźnia Raciborska"],
+      "Kzn": ["Krzyżanowice"],
+      "Lsz": ["Leszczyny"],
+      "ŁS": ["Łaziska Średnie"],
+      "Mc": ["Mąkołowiec"],
+      "MJ": ["Mikołów Jamna"],
+      "Na": ["Nędza"],
+      "NWs": ["Nędza Wieś"],
+      "OJ": ["Orzesze Jaśkowice"],
+      "Ol": ["Olza"],
+      "Or": ["Orzesze"],
+      "PŚ": ["Pawłowice Śląskie"],
+      "R": ["Racibórz"],
+	  "RaO": ["Radlin Obszary"],
+      "Rb": ["Rybnik"],
+      "RM": ["Racibórz Markowice"],
+      "RN": ["Rybnik Niewiadom"],
+	  "RT": ["Rybnik Towarowy"],
+      "Ry": ["Rydułtowy"],
+      "St": ["Strumień"],
+      "Sta": ["Studzionka"],
+      "Su": ["Sumina"],
+      "Ty": ["Tychy"],
+	  "Wa": ["Warszowice"],
+      "WS": ["Wodzisław Śląski"],
+      "Żo": ["Żory"],
+      "Raw": ["Radoszowy"],
+      "RKc": ["Ruda Kochłowice"],
+      "Hj": ["Hajduki"],
+	  "RWr": ["Ruda Wirek"],
+	  "RBi": ["Ruda Bielszowice"],
+      "ZM": ["Zabrze Makoszowy"],
+      "ZMK": ["Zabrze Makoszowy Kopalnia"],
+      "Miz": ["Mizerów"],
+	  "Gie": ["Gierałtowice"],
+      "MPn": ["Maciejów Północny"],
+	  "GS": ["Gliwice Sośnica"],
+      "Gl": ["Gliwice"],
+	  "Szo": ["Szobiszowice"],
+      "GP": ["Gliwice Port"],
+	  "GŁ": ["Gliwice Łabędy"],
+	  "Ta": ["Taciszów"],
+      "RG": ["Rudziniec Gliwicki"],
+      "Pk": ["Pyskowice"],
+      "Pa": ["Paczyna"],
+      "To": ["Toszek"],
+      "TP": ["Toszek Północ"],
+	  "Czr": ["Czarków"],
+      "Dri": ["Droniowiczki"],
+      "Lc": ["Lubliniec"],
+      "Jw": ["Jawornica"],
+	  "Pwk": ["Pawonków"],
+      "Csa": ["Ciasna"],
+	  "Srk": ["Sieraków Śląski"],
+	  "Kos": ["Koszęcin"],
+      "Rw": ["Rusinowice"],
+      "Stb": ["Strzebiń"],
+      "Bor": ["Boronów"],
+      "Kwc": ["Kochanowice"],
+	  "Lis": ["Lisów"],
+	  "Lsw": ["Liswarta"],
+	  "HN": ["Herby Nowe"],
+      "HS": ["Herby Stare"],
+      "Pn": ["Panki"],
+      "Kp": ["Krzepice"],
+      "Ja": ["Janinów"],
+	  "Bln": ["Blachownia"],
+	  "Gn": ["Częstochowa Gnaszyn"],
+      "CS": ["Częstochowa Stradom"],
+      "CO": ["Częstochowa Osobowa"],
+      "CT": ["Częstochowa Towarowa"],
+      "Wy": ["Wyczerpy"],
+      "Rz": ["Rząsawa"],
+	  "Ck": ["Cykarzew"],
+      "Rd": ["Rudniki koło Częstochowy"],
+      "Tk": ["Widzów Teklinów"],
+      "Ku": ["Kucelinka"],
+      "CMr": ["Częstochowa Mirów"],
+      "Pr": ["Poraj"],
+	  "Ms": ["Myszków"],
+	  "Sw": ["Siewierz"],
+	  "GW": ["Góra Włodowska"],
+      "Ł": ["Łazy"],
+	  "Pmi": ["Przymiarki"],
+	  "DZ": ["Dąbrowa Górnicza Ząbkowice"],
+      "DS": ["Dąbrowa Górnicza Strzemieszyce"],
+      "DP": ["Dąbrowa Górnicza Południowa"],
+	  "DGHK": ["Dąbrowa Górnicza Huta Katowice"],
+      "DG": ["Dąbrowa Górnicza"],
+	  "DW": ["Dąbrowa Górnicza Wschodnia"],
+	  "DT": ["Dąbrowa Górnicza Towarowa"],
+      "Sł": ["Sławków"],
+	  "BŁ": ["Będzin Łagisza"],
+      "DGP": ["Dąbrowa Górnicza Piekło"],
+	  "Bn": ["Będzin"],
+      "SG": ["Sosnowiec Główny"],
+      "SPł": ["Sosnowiec Południowy"],
+      "KSz": ["Katowice Szopienice Północne"],
+	  "Sk": ["Stawiska"],
+	  "Szb": ["Szabelnia"],
+	  "Mw": ["Mysłowice"],
+      "SDn": ["Sosnowiec Dańdówka"],
+      "Ju": ["Juliusz"],
+      "SKz": ["Sosnowiec Kazimierz"],
+	  "Dra": ["Dorota"],
+      "SMa": ["Sosnowiec Maczki"],
+	  "Dł": ["Długoszyn"],
+      "JS": ["Jaworzno Szczakowa"],
+      "BG": ["Borowa Górka"],
+      "MB": ["Mysłowice Brzezinka"],
+      "MKs": ["Mysłowice Kosztowy"],
+      "Im": ["Imielin"],
+	  "CSl": ["Chełm Śląski"],
+      "NB": ["Nowy Bieruń"],
+      "CD": ["Czechowice Dziedzice"],
+      "Psz": ["Pszczyna"],
+      "ZC": ["Zabrzeg Czarnolesie"],
+	  "Chy": ["Chybie"],
+      "Pch": ["Pruchna"],
+      "Zeb": ["Zebrzydowice"],
+      "Kc": ["Kaczyce"],
+      "CMl": ["Cieszyn Marklowice"],
+      "Cn": ["Cieszyn"],
+      "Ut": ["Ustroń"],
+	  "WG": ["Wisła Głębce"],
+      "UP": ["Ustroń Polana"],
+	  "WU": ["Wisła Uzdrowisko"],
+	  "Sko": ["Skoczów"],
+      "Bi": ["Bieniowiec"],
+      "CDd": ["Czechowice Dziedzice Południowe"],
+	  "BKm": ["Bielsko Biała Komorowice"],
+      "BB": ["Bielsko Biała Główna"],
+	  "BBW": ["Bielsko Biała Wschód"],
+	  "BLp": ["Bielsko Biała Lipnik"],
+      "BBL": ["Bielsko Biała Leszczyny"],
+      "WB": ["Wilkowice Bystra"],
+	  "Że": ["Żywiec"],
+      "Rj": ["Rajcza"],
+      "Sl": ["Sól"],
+	  "KKs": ["Katowice Kostuchna"],
+      "KOc": ["Katowice Ochojec"],
+	  "Ssc": ["Staszic"],
+      "KT": ["Katowice Towarowa"],
+	  "CB": ["Chorzów Batory"],
+      "RC": ["Ruda Chebzie"],
+      "Zz": ["Zabrze"],
+      "SiS": ["Siemianowice Śląskie"],
+	  "Bt": ["Bytom"],
+      "BBk": ["Bytom Bobrek"],
+      "ZB": ["Zabrze Biskupice"],
+      "PSS": ["Piekary Śląskie Szarlej"],
+	  "NS": ["Nakło Śląskie"],
+	  "Klt": ["Kalety"],
+      "Stb": ["Strzebiń"],
+      "TG": ["Tarnowskie Góry"],
+	  "Pc": ["Pieczyska", "Pierściec"],
+      "Zw": ["Zawiercie", "Zwardoń"],
+	  "Kł": ["Kłobuck", "Kłomnice"],
+      "Br": ["Borowiany", "Bronów"],
+	  "KM": ["Katowice Muchowiec", "Krupski Młyn"],
+      "Mi": ["Mikołów", "Milówka", "Miedźno"],
+      "Kz": ["Kozioł", "Kozy"],
+	  "TMo": ["Tychy Miasto"],
+	  "Ło": ["Łodygowice"],
+	  "BSt": ["Bieruń Stary"],
+	  "Ly": ["Lędziny"],
+	  "GSc": ["Górki Ścierne"],
+	  "T": ["Tworóg"]
+  };
 
-    let remainingShortcuts = {};
-    let currentShortcut = '';
-    let score = 0;
-    let highscore = localStorage.getItem("highscore") || 0;
-    let bestTime = localStorage.getItem("bestTime") || null;
+  let remainingShortcuts = {};
+  let currentShortcut = '';
+  let score = 0;
+  let highscore = localStorage.getItem("highscore") || 0;
+  let bestTime = localStorage.getItem("bestTime") || null;
 
-    let gameEndedByWin = false;
+  let gameEndedByWin = false;
 
-    let startTime;
-    let timerInterval;
+  let startTime;
+  let timerInterval;
 
-    function formatTime(seconds) {
-      const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-      const s = String(seconds % 60).padStart(2, '0');
-      return `${m}:${s}`;
-    }
+  function formatTime(seconds) {
+    const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    return `${m}:${s}`;
+  }
 
-    function startTimer() {
-      startTime = Date.now();
-      timerInterval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        document.getElementById("timer").textContent = "Czas: " + formatTime(elapsed);
-      }, 1000);
-    }
-
-    function stopTimer() {
-      clearInterval(timerInterval);
+  function startTimer() {
+    startTime = Date.now();
+    timerInterval = setInterval(() => {
       const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      return elapsed;
+      document.getElementById("timer").textContent = "Czas: " + formatTime(elapsed);
+    }, 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(timerInterval);
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    return elapsed;
+  }
+
+  function startGame() {
+    document.getElementById("start-screen").style.display = "none";
+    document.getElementById("end-screen").style.display = "none";
+    document.getElementById("game-container").style.display = "inline-block";
+
+    remainingShortcuts = { ...allShortcuts };
+    score = 0;
+    gameEndedByWin = false;
+
+    document.getElementById("score").textContent = score;
+    document.getElementById("highscore").textContent = highscore;
+    document.getElementById("feedback").textContent = '';
+    document.getElementById("timer").textContent = "Czas: 00:00";
+    document.getElementById("best-time-live").textContent = bestTime
+      ? "Najlepszy czas: " + formatTime(bestTime)
+      : "Najlepszy czas: --:--";
+
+    pickRandomShortcut();
+    startTimer();
+  }
+
+  function pickRandomShortcut() {
+    const keys = Object.keys(remainingShortcuts);
+    if (keys.length === 0) {
+      gameEndedByWin = true;
+      endGame();
+      return;
+    }
+    const randomIndex = Math.floor(Math.random() * keys.length);
+    currentShortcut = keys[randomIndex];
+    document.getElementById("shortcode").textContent = currentShortcut;
+    document.getElementById("answer").value = '';
+    document.getElementById("feedback").textContent = '';
+  }
+
+  function checkAnswer() {
+    const userAnswer = document.getElementById("answer").value.trim().toLowerCase();
+    if (!userAnswer) {
+      document.getElementById("feedback").textContent = "Wpisz odpowiedź!";
+      return;
     }
 
-    function startGame() {
-      document.getElementById("start-screen").style.display = "none";
-      document.getElementById("end-screen").style.display = "none";
-      document.getElementById("game-container").style.display = "inline-block";
-
-      remainingShortcuts = { ...allShortcuts };
-      score = 0;
-      gameEndedByWin = false;
-
+    const correctAnswers = remainingShortcuts[currentShortcut].map(ans => ans.toLowerCase());
+    if (correctAnswers.includes(userAnswer)) {
+      score++;
       document.getElementById("score").textContent = score;
-      document.getElementById("highscore").textContent = highscore;
-      document.getElementById("feedback").textContent = '';
-      document.getElementById("timer").textContent = "Czas: 00:00";
-      document.getElementById("best-time-live").textContent = bestTime
-        ? "Najlepszy czas: " + formatTime(bestTime)
-        : "Najlepszy czas: --:--";
-
+      if (score > highscore) {
+        highscore = score;
+        localStorage.setItem("highscore", highscore);
+        document.getElementById("highscore").textContent = highscore;
+      }
+      delete remainingShortcuts[currentShortcut];
       pickRandomShortcut();
-      startTimer();
+    } else {
+      const correctList = remainingShortcuts[currentShortcut].join(" / ");
+      document.getElementById("feedback").textContent =
+        `Zła odpowiedź! Poprawnie: ${correctList}`;
+      setTimeout(() => endGame(), 2000);
     }
+  }
 
-    function pickRandomShortcut() {
-      const keys = Object.keys(remainingShortcuts);
-      if (keys.length === 0) {
-        gameEndedByWin = true;
-        endGame();
-        return;
+  function endGame() {
+    const finalSeconds = stopTimer();
+    document.getElementById("game-container").style.display = "none";
+    document.getElementById("end-screen").style.display = "inline-block";
+    document.getElementById("final-time").textContent = "Twój czas: " + formatTime(finalSeconds);
+
+    if (gameEndedByWin) {
+      document.getElementById("end-title").textContent = "✅ Gratulacje!";
+      document.getElementById("end-message").textContent = "Odgadłeś wszystkie skróty!";
+
+      if (!bestTime || finalSeconds < bestTime) {
+        bestTime = finalSeconds;
+        localStorage.setItem("bestTime", bestTime);
       }
-      const randomIndex = Math.floor(Math.random() * keys.length);
-      currentShortcut = keys[randomIndex];
-      document.getElementById("shortcode").textContent = currentShortcut;
-      document.getElementById("answer").value = '';
-      document.getElementById("feedback").textContent = '';
+      document.getElementById("best-time").textContent = "Najlepszy czas: " + formatTime(bestTime);
+    } else {
+      document.getElementById("end-title").textContent = "❌ Przegrałeś!";
+      document.getElementById("end-message").textContent = "Spróbuj ponownie.";
+      document.getElementById("best-time").textContent = bestTime
+        ? "Najlepszy czas: " + formatTime(bestTime)
+        : "";
     }
+  }
 
-    function checkAnswer() {
-      const userAnswer = document.getElementById("answer").value.trim().toLowerCase();
-      const correctAnswer = remainingShortcuts[currentShortcut].toLowerCase();
-      if (userAnswer === correctAnswer) {
-        score++;
-        document.getElementById("score").textContent = score;
-        if (score > highscore) {
-          highscore = score;
-          localStorage.setItem("highscore", highscore);
-          document.getElementById("highscore").textContent = highscore;
-        }
-        delete remainingShortcuts[currentShortcut];
-        pickRandomShortcut();
-      } else {
-        document.getElementById("feedback").textContent =
-          `Zła odpowiedź! Poprawnie: ${remainingShortcuts[currentShortcut]}`;
-        setTimeout(() => endGame(), 2000);
-      }
-    }
+  window.onload = () => {
+    document.getElementById("start-screen").style.display = "inline-block";
+    document.getElementById("answer").addEventListener("keypress", function (e) {
+      if (e.key === "Enter") checkAnswer();
+    });
+	
+	
+  };
+</script>
 
-    function endGame() {
-      const finalSeconds = stopTimer();
-      document.getElementById("game-container").style.display = "none";
-      document.getElementById("end-screen").style.display = "inline-block";
-      document.getElementById("final-time").textContent = "Twój czas: " + formatTime(finalSeconds);
-
-      if (gameEndedByWin) {
-        document.getElementById("end-title").textContent = "✅ Gratulacje!";
-        document.getElementById("end-message").textContent = "Odgadłeś wszystkie skróty!";
-
-        if (!bestTime || finalSeconds < bestTime) {
-          bestTime = finalSeconds;
-          localStorage.setItem("bestTime", bestTime);
-        }
-        document.getElementById("best-time").textContent = "Najlepszy czas: " + formatTime(bestTime);
-      } else {
-        document.getElementById("end-title").textContent = "❌ Przegrałeś!";
-        document.getElementById("end-message").textContent = "Spróbuj ponownie.";
-        document.getElementById("best-time").textContent = bestTime
-          ? "Najlepszy czas: " + formatTime(bestTime)
-          : "";
-      }
-    }
-
-    window.onload = () => {
-      document.getElementById("start-screen").style.display = "inline-block";
-    };
-  </script>
 
 </body>
 </html>
