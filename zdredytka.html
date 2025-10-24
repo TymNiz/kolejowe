@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDYTKA NA RTR</title>
+<style>
+  body {
+    background: #bdbdbd;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh;
+    margin: 0;
+  }
+
+  /* Pasek z informacjami o koncie i wygranej */
+  .info-panel {
+    width: 800px;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    font-size: 22px;
+    color: #222;
+  }
+
+  .zdrapka {
+    background: url('tlozdr.png') center/cover no-repeat;
+    width: 800px;
+    height: 640px; /* delikatnie większa wysokość, żeby nic się nie ścięło */
+    border: 4px solid #888;
+    border-radius: 12px;
+    position: relative;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .pola {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    width: 100%;
+    height: 60%;
+    border: 2px solid #666;
+  }
+
+  .pole {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #777;
+    aspect-radio: 1/1; /* zostawiam literówkę */
+  }
+
+  .pole img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .kontrolki {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  button {
+    background: #888;
+    border: none;
+    padding: 10px 20px;
+    font-size: 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  }
+
+  button:hover {
+    background: #666;
+  }
+</style>
+</head>
+<body>
+  <div class="info-panel">
+    <div id="wynik">WYGRANA: 0 zł</div>
+    <div id="konto">KONTO: 100 zł</div>
+  </div>
+
+  <div class="zdrapka">
+    <div class="pola" id="pola"></div>
+    <div class="kontrolki">
+      <button id="nowa">Następna zdrapka</button>
+	  <a href="zdr.html"> Powrót </a> <br>
+    </div>
+  </div>
+
+<script>
+const container = document.getElementById("pola");
+const wynikBox = document.getElementById("wynik");
+const kontoBox = document.getElementById("konto");
+const btnNowa = document.getElementById("nowa");
+
+const iloscPol = 12;
+const obrazki = ["win.png", "lose.png"];
+const kosztZdrapki = 8;
+
+let konto = parseFloat(localStorage.getItem("konto")) || 100;
+let ostatniaWygrana = parseFloat(localStorage.getItem("ostatniaWygrana")) || 0;
+
+// aktualizacja UI na start
+kontoBox.textContent = `KONTO: ${konto.toFixed(0)} zł`;
+wynikBox.textContent = `WYGRANA: ${ostatniaWygrana.toFixed(0)} zł`;
+
+function zapiszStan() {
+  localStorage.setItem("konto", konto.toFixed(2));
+  localStorage.setItem("ostatniaWygrana", ostatniaWygrana.toFixed(2));
+}
+
+function losujIloscWygranych() {
+  const r = Math.random();
+  if (r < 0.35) return 0;
+  if (r < 0.60) return 1;
+  if (r < 0.75) return 2;
+  if (r < 0.85) return 3;
+  if (r < 0.90) return 4;
+  if (r < 0.94) return 5;
+  if (r < 0.96) return 6;
+  if (r < 0.975) return 7;
+  if (r < 0.985) return 8;
+  if (r < 0.992) return 9;
+  if (r < 0.996) return 10;
+  if (r < 0.999) return 11;
+  return 12;
+}
+
+function wartoscZaWygrane(ile) {
+  if (ile === 1) return 5;
+  if (ile === 2) return 10;
+  if (ile === 3) return 20;
+  if (ile === 4) return 30;
+  if (ile === 5) return 50;
+  if (ile === 6) return 75;
+  if (ile === 7) return 100;
+  if (ile === 8) return 150;
+  if (ile === 9) return 200;
+  if (ile === 10) return 300;
+  if (ile === 11) return 500;
+  if (ile === 12) return 1000;
+  return 0;
+}
+
+function generujZdrapke() {
+  if (konto < kosztZdrapki) {
+    alert("Brak środków na nową zdrapkę!");
+    return;
+  }
+
+  konto -= kosztZdrapki;
+  ostatniaWygrana = 0;
+  kontoBox.textContent = `KONTO: ${konto.toFixed(0)} zł`;
+  wynikBox.textContent = `WYGRANA: 0 zł`;
+  zapiszStan();
+
+  container.innerHTML = "";
+
+  const ileWygranych = losujIloscWygranych();
+  const pola = Array(iloscPol).fill("lose.png");
+  for (let i = 0; i < ileWygranych; i++) pola[i] = "win.png";
+  pola.sort(() => Math.random() - 0.5);
+
+  const nagrodaZaJedno = ileWygranych > 0 ? wartoscZaWygrane(ileWygranych) / ileWygranych : 0;
+
+  pola.forEach(src => {
+    const div = document.createElement("div");
+    div.classList.add("pole");
+    const img = document.createElement("img");
+    img.src = src;
+    div.appendChild(img);
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const w = 180;
+    const h = 120;
+    canvas.width = w;
+    canvas.height = h;
+    ctx.fillStyle = "#999";
+    ctx.fillRect(0, 0, w, h);
+    div.appendChild(canvas);
+    container.appendChild(div);
+
+    let zdrapywanie = false;
+    let odkrytePole = false;
+
+    const start = e => { zdrapywanie = true; zdrap(e); };
+    const stop = () => zdrapywanie = false;
+    const zdrap = e => {
+      if (!zdrapywanie) return;
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(x, y, 25, 0, Math.PI * 2);
+      ctx.fill();
+
+      const imgData = ctx.getImageData(0, 0, w, h);
+      let odkryte = 0;
+      for (let i = 3; i < imgData.data.length; i += 4) {
+        if (imgData.data[i] === 0) odkryte++;
+      }
+      const procent = odkryte / (w * h) * 100;
+      if (procent > 65) {
+        canvas.style.opacity = 0;
+        canvas.style.pointerEvents = "none";
+
+        if (!odkrytePole) {
+          odkrytePole = true;
+          if (src === "win.png") {
+            ostatniaWygrana += nagrodaZaJedno;
+            konto += nagrodaZaJedno;
+            wynikBox.textContent = `WYGRANA: ${ostatniaWygrana.toFixed(0)} zł`;
+            kontoBox.textContent = `KONTO: ${konto.toFixed(0)} zł`;
+            zapiszStan();
+          }
+        }
+      }
+    };
+
+    canvas.addEventListener("mousedown", start);
+    canvas.addEventListener("mouseup", stop);
+    canvas.addEventListener("mousemove", zdrap);
+    canvas.addEventListener("touchstart", start);
+    canvas.addEventListener("touchend", stop);
+    canvas.addEventListener("touchmove", zdrap);
+  });
+}
+
+btnNowa.addEventListener("click", generujZdrapke);
+window.addEventListener("load", () => {
+  kontoBox.textContent = `KONTO: ${konto.toFixed(0)} zł`;
+  wynikBox.textContent = `WYGRANA: ${ostatniaWygrana.toFixed(0)} zł`;
+});
+</script>
+</body>
+</html>

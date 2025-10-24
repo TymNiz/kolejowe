@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zdrapki</title>
+<style>
+  body {
+    background: #bdbdbd;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh;
+    margin: 0;
+    padding-top: 60px;
+	position: relative;
+  }
+
+  h1 {
+    font-size: 32px;
+    color: #222;
+    margin-bottom: 40px;
+    text-shadow: 1px 1px 0 #fff;
+  }
+  
+  .konto-box {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    background: #dcdcdc;
+    border: 3px solid #777;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #222;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+
+  .lista-zdrapek {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    width: 80%;
+    max-width: 800px;
+  }
+
+  .zdrapka-box {
+    background: #dcdcdc;
+    border: 4px solid #888;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    text-align: center;
+    padding: 30px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .zdrapka-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+  }
+
+  .zdrapka-box h2 {
+    margin: 0 0 10px 0;
+    font-size: 22px;
+    color: #111;
+  }
+
+  .zdrapka-box p {
+    font-size: 16px;
+    color: #444;
+  }
+
+  footer {
+    position: absolute;
+    bottom: 20px;
+    font-size: 14px;
+    color: #333;
+  }
+</style>
+</head>
+<body>
+  <h1>WYBIERZ ZDRAPKĘ</h1>
+  
+  <div class="konto-box" id="konto"></div>
+
+  <div class="lista-zdrapek">
+    <div class="zdrapka-box" onclick="window.location.href='zdredytka.html'">
+      <h2>Edytka na RTR</h2>
+      <p>Rozpruj rozjazd, a dostaniesz nagrodę! Gdy rozprujesz 12 rozjazdów - wygrywasz główną nagrodę</p>
+	  <p>Cennik: Zdrapka-8zł. Nagroda za rozprute rozjazdy: 1-5zł,2-10zł,3-20zł,4-30zł,5-50zł,6-75zł, 7-100zł,8-150zł,9-200zł,10-300zł,11-500zł,12-1000zł</p>
+    </div>
+
+    <!-- 🔹 Możesz łatwo dodać kolejne zdrapki:
+    <div class="zdrapka-box" onclick="window.location.href='zlotytraf.html'">
+      <h2>💰 Złoty Traf</h2>
+      <p>Nowa zdrapka premium</p>
+    </div>
+    -->
+  </div>
+	<b> Powrót </b> <a href="index.html"> KLIK </a> <br>
+
+<script>
+    // Sprawdź, czy konto już istnieje w localStorage, jeśli nie – ustaw startowe 100 zł
+    let konto = localStorage.getItem("konto");
+    if (konto === null) {
+      konto = 100;
+      localStorage.setItem("konto", konto);
+    }
+
+    // Wyświetl stan konta
+    document.getElementById("konto").textContent = `Stan konta: ${konto} zł`;
+  </script>
+</body>
+</html>
