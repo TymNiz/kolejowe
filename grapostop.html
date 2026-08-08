@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Gra ze skrótami</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef;
+      text-align: center;
+      padding: 30px;
+    }
+    #start-screen, #game-container, #end-screen {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #aaa;
+      display: none;
+    }
+    input {
+      padding: 8px;
+      font-size: 16px;
+      width: 250px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    .scoreboard {
+      margin-top: 20px;
+    }
+    #feedback {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    #timer {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="start-screen">
+    <h1>Witaj w grze!</h1>
+    <p>
+      Twoim zadaniem jest odpowiedzenie jakiej nazwie stacji odpowiada wylosowany skrót telegraficzny stacji<br>
+      Za każdą poprawną odpowiedź zdobywasz punkt. Gra toczy się do pierwszej pomyłki.<br>
+      Spróbuj pobić swój rekord!<br>
+	  UWAGA! Gra objęta jest obszarem województwa opolskiego !z sieci PKP PLK!.<br>
+	  Stan na 07.2026 <br>
+	  <a href="index.html"> POWRÓT </a>
+    </p>
+    <button onclick="startGame()">GRAJ</button>
+  </div>
+
+  <!-- Gra -->
+  <div id="game-container">
+    <h1>Rozszyfruj skrót</h1>
+    <div id="shortcode" style="font-size: 32px; margin: 20px;">???</div>
+    <input type="text" id="answer" placeholder="Wpisz rozwinięcie" />
+    <br>
+    <button onclick="checkAnswer()">Sprawdź</button>
+    <div id="feedback"></div>
+    <div class="scoreboard">
+      <p>Punkty: <span id="score">0</span></p>
+      <p>Rekord: <span id="highscore">0</span></p>
+      <p id="timer">Czas: 00:00</p>
+      <p id="best-time-live">Najlepszy czas: --:--</p>
+    </div>
+  </div>
+  <div id="end-screen">
+    <h1 id="end-title"></h1>
+    <p id="end-message"></p>
+    <p id="final-time"></p>
+    <p id="best-time"></p>
+    <button onclick="startGame()">Zagraj ponownie</button>
+  </div>
+
+  <script>
+  const allShortcuts = {
+      "Gu": ["Głuchołazy"],
+	  "NŚ": ["Nowy Świętów"],
+	  "Se": ["Sławięcice"],
+	  "NWp": ["Nowa Wieś"],
+	  "KK": ["Kędzierzyn-Koźle"],
+	  "KKZ": ["Kędzierzyn-Koźle Zachodnie"],
+	  "Td": ["Twardawa"],
+	  "Gw": ["Głogówek"],
+	  "Pd": ["Prudnik"],
+	  "Ns": ["Nysa"],
+	  "Gś": ["Goświnowice"],
+	  "Ot": ["Otmuchów"],
+	  "Pa": ["Paczków"],
+	  "Sdw": ["Szydłów"],
+	  "Dzi": ["Dziergowice"],
+	  "Bwa": ["Bierawa"],
+	  "Żbn": ["Żabieniec"],
+	  "Ra": ["Raszowa"],
+	  "Zd": ["Zdzieszowice"],
+	  "Gg": ["Gogolin"],
+	  "Gd": ["Górażdże"],
+	  "PO": ["Przywory Opolskie"],
+	  "OG": ["Opole Groszowice"],
+	  "TO": ["Tarnów Opolski"],
+	  "Om": ["Otmice"],
+	  "Smw": ["Szymiszów"],
+	  "SOe": ["Strzelce Opolskie"],
+	  "BSt": ["Błotnica Strzelecka"],
+	  "Op": ["Opole Główne"],
+	  "OT": ["Opole Towarowe"],
+	  "OpW": ["Opole Wschodnie"],
+	  "Bk": ["Bolko"],
+	  "Ch": ["Chrząstowice"],
+	  "Ok": ["Ozimek"],
+	  "Fo": ["Fosowskie"],
+	  "Za": ["Zawadzkie"],
+	  "Pld": ["Pludry"],
+	  "OCr": ["Opole Czarnowąsy"],
+	  "DW": ["Dobrzeń Wielki"],
+	  "Ka": ["Karłowice"],
+	  "Pl": ["Popielów"],
+	  "OZ": ["Opole Zachodnie"],
+	  "LB": ["Lewin Brzeski"],
+	  "Bg": ["Brzeg"]
+  };
+
+  let remainingShortcuts = {};
+  let currentShortcut = '';
+  let score = 0;
+  let highscore = localStorage.getItem("highscore") || 0;
+  let bestTime = localStorage.getItem("bestTime") || null;
+
+  let gameEndedByWin = false;
+
+  let startTime;
+  let timerInterval;
+
+  function formatTime(seconds) {
+    const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  function startTimer() {
+    startTime = Date.now();
+    timerInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      document.getElementById("timer").textContent = "Czas: " + formatTime(elapsed);
+    }, 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(timerInterval);
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    return elapsed;
+  }
+
+  function startGame() {
+    document.getElementById("start-screen").style.display = "none";
+    document.getElementById("end-screen").style.display = "none";
+    document.getElementById("game-container").style.display = "inline-block";
+
+    remainingShortcuts = { ...allShortcuts };
+    score = 0;
+    gameEndedByWin = false;
+
+    document.getElementById("score").textContent = score;
+    document.getElementById("highscore").textContent = highscore;
+    document.getElementById("feedback").textContent = '';
+    document.getElementById("timer").textContent = "Czas: 00:00";
+    document.getElementById("best-time-live").textContent = bestTime
+      ? "Najlepszy czas: " + formatTime(bestTime)
+      : "Najlepszy czas: --:--";
+
+    pickRandomShortcut();
+    startTimer();
+  }
+
+  function pickRandomShortcut() {
+    const keys = Object.keys(remainingShortcuts);
+    if (keys.length === 0) {
+      gameEndedByWin = true;
+      endGame();
+      return;
+    }
+    const randomIndex = Math.floor(Math.random() * keys.length);
+    currentShortcut = keys[randomIndex];
+    document.getElementById("shortcode").textContent = currentShortcut;
+    document.getElementById("answer").value = '';
+    document.getElementById("feedback").textContent = '';
+  }
+
+  function checkAnswer() {
+    const userAnswer = document.getElementById("answer").value.trim().toLowerCase();
+    if (!userAnswer) {
+      document.getElementById("feedback").textContent = "Wpisz odpowiedź!";
+      return;
+    }
+
+    const correctAnswers = remainingShortcuts[currentShortcut].map(ans => ans.toLowerCase());
+    if (correctAnswers.includes(userAnswer)) {
+      score++;
+      document.getElementById("score").textContent = score;
+      if (score > highscore) {
+        highscore = score;
+        localStorage.setItem("highscore", highscore);
+        document.getElementById("highscore").textContent = highscore;
+      }
+      delete remainingShortcuts[currentShortcut];
+      pickRandomShortcut();
+    } else {
+      const correctList = remainingShortcuts[currentShortcut].join(" / ");
+      document.getElementById("feedback").textContent =
+        `Zła odpowiedź! Poprawnie: ${correctList}`;
+      setTimeout(() => endGame(), 2000);
+    }
+  }
+
+  function endGame() {
+    const finalSeconds = stopTimer();
+    document.getElementById("game-container").style.display = "none";
+    document.getElementById("end-screen").style.display = "inline-block";
+    document.getElementById("final-time").textContent = "Twój czas: " + formatTime(finalSeconds);
+
+    if (gameEndedByWin) {
+      document.getElementById("end-title").textContent = "✅ Gratulacje!";
+      document.getElementById("end-message").textContent = "Odgadłeś wszystkie skróty!";
+
+      if (!bestTime || finalSeconds < bestTime) {
+        bestTime = finalSeconds;
+        localStorage.setItem("bestTime", bestTime);
+      }
+      document.getElementById("best-time").textContent = "Najlepszy czas: " + formatTime(bestTime);
+    } else {
+      document.getElementById("end-title").textContent = "❌ Przegrałeś!";
+      document.getElementById("end-message").textContent = "Spróbuj ponownie.";
+      document.getElementById("best-time").textContent = bestTime
+        ? "Najlepszy czas: " + formatTime(bestTime)
+        : "";
+    }
+  }
+
+  window.onload = () => {
+    document.getElementById("start-screen").style.display = "inline-block";
+    document.getElementById("answer").addEventListener("keypress", function (e) {
+      if (e.key === "Enter") checkAnswer();
+    });
+	
+	
+  };
+</script>
+
+
+</body>
+</html>
