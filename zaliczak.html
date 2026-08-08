@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<a href="index.html"> POWRÓT </a> <br>
+    <title>Zaliczak Pojazdów</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f4f4f9; }
+        .form-container, .filters { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input, button { padding: 8px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+        button.danger { background: #dc3545; }
+        button.danger:hover { background: #c82333; }
+        button.success { background: #28a745; }
+        .entry-card { background: white; padding: 15px; margin-bottom: 10px; border-left: 5px solid #007bff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .vehicle-number { font-size: 1.4em; font-weight: bold; margin-bottom: 5px; }
+        .entry-details { font-size: 0.9em; font-weight: bold; color: #555; margin-left: 10px; }
+        .entry-actions { margin-top: 10px; text-align: right; }
+        .entry-actions button { width: auto; margin-left: 10px; padding: 5px 10px; font-size: 0.8em; }
+        .filters input { width: auto; margin-right: 10px; }
+    </style>
+</head>
+<body>
+
+    <h1>Zaliczak Pojazdów</h1>
+
+    <!-- Formularz dodawania/edycji -->
+    <div class="form-container">
+        <h2 id="form-title">Dodaj pojazd</h2>
+        <input type="text" id="vehicle" placeholder="Numer pojazdu (np. 163 047)" required>
+        <input type="date" id="date" required>
+        <input type="text" id="location" placeholder="Miejsce" required>
+        <input type="text" id="remarks" placeholder="Uwagi">
+        <input type="hidden" id="edit-id">
+        <button id="save-btn" class="success">Zapisz</button>
+        <button id="cancel-btn" style="display:none; background:#6c757d;" onclick="cancelEdit()">Anuluj edycję</button>
+    </div>
+
+    <!-- Filtry -->
+    <div class="filters">
+        <h2>Filtry</h2>
+        <label>Data od:</label>
+        <input type="date" id="filter-date-from">
+        <label>Data do:</label>
+        <input type="date" id="filter-date-to">
+        <br>
+        <label>Miejsce:</label>
+        <input type="text" id="filter-location" placeholder="Wpisz miejscowość">
+        <br><br>
+        <button onclick="applyFilters()">Filtruj</button>
+        <button onclick="resetFilters()" style="background:#6c757d;">Resetuj filtry</button>
+    </div>
+
+    <!-- Miejsce na listę -->
+    <div id="entries-list"></div>
+
+    <script>
+        // Pobieranie wpisów z localStorage
+        function getEntries() {
+            let entries = localStorage.getItem('vehicleEntries');
+            return entries ? JSON.parse(entries) : [];
+        }
+
+        // Zapisywanie wpisów do localStorage
+        function saveEntries(entries) {
+            localStorage.setItem('vehicleEntries', JSON.stringify(entries));
+        }
+
+        // Funkcja sortująca wg Twoich wymagań
+        function sortEntries(entries) {
+            return entries.sort((a, b) => {
+                // 1. Sortowanie po numerze pojazdu (numerycznie, ignorując spacje)
+                let numA = parseInt(a.vehicle.replace(/\s/g, ''));
+                let numB = parseInt(b.vehicle.replace(/\s/g, ''));
+                if (numA !== numB) return numA - numB;
+
+                // 2. Sortowanie chronologiczne po dacie
+                if (a.date !== b.date) return new Date(a.date) - new Date(b.date);
+
+                // 3. Jeśli ta sama data - alfabetycznie po miejscu
+                return a.location.localeCompare(b.location);
+            });
+        }
+
+        // Renderowanie (wyświetlanie) na stronie
+        function render() {
+            let entries = getEntries();
+            entries = sortEntries(entries);
+            
+            // Pobieranie wartości z filtrów
+            let fDateFrom = document.getElementById('filter-date-from').value;
+            let fDateTo = document.getElementById('filter-date-to').value;
+            let fLocation = document.getElementById('filter-location').value.toLowerCase();
+
+            // Filtrowanie danych
+            let filteredEntries = entries.filter(entry => {
+                let matchDate = true;
+                let matchLocation = true;
+
+                if (fDateFrom && entry.date < fDateFrom) matchDate = false;
+                if (fDateTo && entry.date > fDateTo) matchDate = false;
+                if (fLocation && !entry.location.toLowerCase().includes(fLocation)) matchLocation = false;
+
+                return matchDate && matchLocation;
+            });
+
+            // Grupowanie po numerze pojazdu
+            const listContainer = document.getElementById('entries-list');
+            listContainer.innerHTML = '';
+            
+            if (filteredEntries.length === 0) {
+                listContainer.innerHTML = '<p>Brak wpisów spełniających kryteria.</p>';
+                return;
+            }
+
+            let currentVehicle = null;
+            let vehicleCard = null;
+
+            filteredEntries.forEach(entry => {
+                if (entry.vehicle !== currentVehicle) {
+                    // Tworzenie karty dla nowego numeru pojazdu
+                    vehicleCard = document.createElement('div');
+                    vehicleCard.className = 'entry-card';
+                    
+                    let title = document.createElement('div');
+                    title.className = 'vehicle-number';
+                    title.innerText = entry.vehicle;
+                    vehicleCard.appendChild(title);
+                    
+                    listContainer.appendChild(vehicleCard);
+                    currentVehicle = entry.vehicle;
+                }
+
+                // Dodawanie szczegółów wpisu pod numerem
+                let details = document.createElement('div');
+                details.className = 'entry-details';
+                details.innerHTML = `Data: ${entry.date} | Miejsce: ${entry.location} ${entry.remarks ? '| Uwagi: ' + entry.remarks : ''}`;
+                
+                // Przyciski Edytuj/Usuń
+                let actions = document.createElement('div');
+                actions.className = 'entry-actions';
+                actions.innerHTML = `
+                    <button class="danger" onclick="deleteEntry('${entry.id}')">Usuń</button>
+                    <button onclick="editEntry('${entry.id}')">Edytuj</button>
+                `;
+
+                details.appendChild(actions);
+                vehicleCard.appendChild(details);
+            });
+        }
+
+        // Dodawanie lub aktualizowanie wpisu
+        document.getElementById('save-btn').addEventListener('click', function() {
+            let vehicle = document.getElementById('vehicle').value.trim();
+            let date = document.getElementById('date').value;
+            let location = document.getElementById('location').value.trim();
+            let remarks = document.getElementById('remarks').value.trim();
+            let editId = document.getElementById('edit-id').value;
+
+            if (!vehicle || !date || !location) {
+                alert('Wypełnij wymagane pola: Numer, Data, Miejsce!');
+                return;
+            }
+
+            let entries = getEntries();
+
+            if (editId) {
+                // Edycja istniejącego
+                let index = entries.findIndex(e => e.id === editId);
+                if (index !== -1) {
+                    entries[index] = { id: editId, vehicle, date, location, remarks };
+                }
+                document.getElementById('form-title').innerText = 'Dodaj pojazd';
+                document.getElementById('save-btn').innerText = 'Zapisz';
+                document.getElementById('cancel-btn').style.display = 'none';
+            } else {
+                // Dodawanie nowego
+                entries.push({
+                    id: Date.now().toString(), // unikalne ID
+                    vehicle, date, location, remarks
+                });
+            }
+
+            saveEntries(entries);
+            
+            // Czyszczenie formularza
+            document.getElementById('vehicle').value = '';
+            document.getElementById('date').value = '';
+            document.getElementById('location').value = '';
+            document.getElementById('remarks').value = '';
+            document.getElementById('edit-id').value = '';
+
+            render();
+        });
+
+        // Usuwanie
+        function deleteEntry(id) {
+            if (confirm('Czy na pewno chcesz usunąć ten wpis?')) {
+                let entries = getEntries().filter(e => e.id !== id);
+                saveEntries(entries);
+                render();
+            }
+        }
+
+        // Edytowanie (ładowanie do formularza)
+        function editEntry(id) {
+            let entry = getEntries().find(e => e.id === id);
+            if (entry) {
+                document.getElementById('vehicle').value = entry.vehicle;
+                document.getElementById('date').value = entry.date;
+                document.getElementById('location').value = entry.location;
+                document.getElementById('remarks').value = entry.remarks;
+                document.getElementById('edit-id').value = entry.id;
+                
+                document.getElementById('form-title').innerText = 'Edytuj wpis';
+                document.getElementById('save-btn').innerText = 'Aktualizuj';
+                document.getElementById('cancel-btn').style.display = 'inline-block';
+                
+                window.scrollTo(0, 0); // Przewija stronę do góry, by widzieć formularz
+            }
+        }
+
+        // Anulowanie edycji
+        function cancelEdit() {
+            document.getElementById('vehicle').value = '';
+            document.getElementById('date').value = '';
+            document.getElementById('location').value = '';
+            document.getElementById('remarks').value = '';
+            document.getElementById('edit-id').value = '';
+            document.getElementById('form-title').innerText = 'Dodaj pojazd';
+            document.getElementById('save-btn').innerText = 'Zapisz';
+            document.getElementById('cancel-btn').style.display = 'none';
+        }
+
+        // Filtry
+        function applyFilters() { render(); }
+        function resetFilters() {
+            document.getElementById('filter-date-from').value = '';
+            document.getElementById('filter-date-to').value = '';
+            document.getElementById('filter-location').value = '';
+            render();
+        }
+
+        // Pierwsze ładowanie strony
+        render();
+    </script>
+</body>
+</html>
